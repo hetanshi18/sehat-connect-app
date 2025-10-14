@@ -7,24 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, User, Mail, Briefcase, GraduationCap, MapPin, Award, Edit } from 'lucide-react';
-import { getCurrentUser } from '@/lib/auth';
-import { Doctor } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
-  const user = getCurrentUser() as Doctor;
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    name: user?.user_metadata?.name || '',
     email: user?.email || '',
-    specialty: user?.specialty || '',
-    experience: user?.experience || 0,
-    qualification: user?.qualification || '',
-    clinicAddress: user?.clinicAddress || '',
-    about: user?.about || '',
-    achievements: user?.achievements?.join(', ') || '',
+    specialty: '',
+    experience: 0,
+    qualification: '',
+    clinicAddress: '',
+    about: '',
+    achievements: '',
   });
 
   const handleSave = () => {
@@ -93,7 +92,7 @@ const DoctorProfile = () => {
             <CardContent>
               <div className="flex flex-col items-center gap-4">
                 <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-primary text-white text-5xl font-bold">
-                  {user?.name.split(' ')[1][0]}
+                  {user?.user_metadata?.name?.split(' ')[0]?.[0] || 'D'}
                 </div>
                 {isEditing && (
                   <Button variant="outline" size="sm" className="w-full">Upload Photo</Button>

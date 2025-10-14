@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Stethoscope, UserCircle, User } from 'lucide-react';
-import { mockLogin, mockSignup, saveUser } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { getUserRole } from '@/lib/auth';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -16,30 +17,60 @@ const Auth = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', name: '' });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
     
-    const user = mockLogin(loginData.email, loginData.password, role);
-    saveUser(user);
-    toast({ title: 'Success', description: `Welcome back, ${user.name}!` });
-    navigate(role === 'patient' ? '/dashboard' : '/doctor/dashboard');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginData.email,
+      password: loginData.password,
+    });
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    if (data.user) {
+      const userRole = await getUserRole(data.user.id);
+      toast({ title: 'Success', description: 'Welcome back!' });
+      navigate(userRole === 'patient' ? '/dashboard' : '/doctor/dashboard');
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signupData.email || !signupData.password || !signupData.name) {
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
     
-    const user = mockSignup(signupData.email, signupData.password, signupData.name, role);
-    saveUser(user);
-    toast({ title: 'Success', description: `Account created for ${user.name}!` });
-    navigate(role === 'patient' ? '/dashboard' : '/doctor/dashboard');
+    const { data, error } = await supabase.auth.signUp({
+      email: signupData.email,
+      password: signupData.password,
+      options: {
+        data: {
+          name: signupData.name,
+          role: role
+        },
+        emailRedirectTo: `${window.location.origin}/`
+      }
+    });
+
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+
+    if (data.user) {
+      toast({ 
+        title: 'Success', 
+        description: 'Account created! Please check your email to verify your account.' 
+      });
+    }
   };
 
   return (

@@ -3,20 +3,19 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, User, Phone, Mail, Droplet, MapPin, FileText, Download } from 'lucide-react';
-import { getCurrentUser } from '@/lib/auth';
-import { Patient } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 import { mockHealthRecords } from '@/lib/mockData';
 
 const PatientProfile = () => {
   const navigate = useNavigate();
-  const user = getCurrentUser() as Patient;
+  const { user } = useAuth();
 
   const profileDetails = [
-    { icon: User, label: 'Name', value: user?.name || 'N/A' },
+    { icon: User, label: 'Name', value: user?.user_metadata?.name || 'N/A' },
     { icon: Mail, label: 'Email', value: user?.email || 'N/A' },
-    { icon: Phone, label: 'Phone', value: user?.phone || 'Not provided' },
-    { icon: Droplet, label: 'Blood Group', value: user?.bloodGroup || 'Not provided' },
-    { icon: MapPin, label: 'Address', value: user?.address || 'Not provided' },
+    { icon: Phone, label: 'Phone', value: user?.user_metadata?.phone || 'Not provided' },
+    { icon: Droplet, label: 'Blood Group', value: 'Not provided' },
+    { icon: MapPin, label: 'Address', value: 'Not provided' },
   ];
 
   const reports = mockHealthRecords.filter(r => r.type === 'report');
@@ -63,7 +62,7 @@ const PatientProfile = () => {
                 <CardTitle className="text-base">Age</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-primary">{user?.age || 'N/A'}</p>
+                <p className="text-3xl font-bold text-primary">N/A</p>
                 <p className="text-sm text-muted-foreground">years old</p>
               </CardContent>
             </Card>

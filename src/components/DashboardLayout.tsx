@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, Stethoscope } from 'lucide-react';
-import { logout, getCurrentUser } from '@/lib/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -11,10 +12,10 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
   const navigate = useNavigate();
-  const user = getCurrentUser();
+  const { user, role } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/auth');
   };
 
@@ -28,12 +29,12 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Sehat Sathi</h1>
-              <p className="text-xs text-muted-foreground">{user?.role === 'patient' ? 'Patient Portal' : 'Doctor Portal'}</p>
+              <p className="text-xs text-muted-foreground">{role === 'patient' ? 'Patient Portal' : 'Doctor Portal'}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm font-medium text-foreground">{user?.name}</p>
+              <p className="text-sm font-medium text-foreground">{user?.user_metadata?.name || user?.email}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <Button variant="outline" size="icon" onClick={handleLogout} aria-label="Logout">
