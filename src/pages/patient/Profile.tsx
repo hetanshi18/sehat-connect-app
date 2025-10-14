@@ -1,25 +1,70 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, User, Phone, Mail, Droplet, MapPin, FileText, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { mockHealthRecords } from '@/lib/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { EditProfileDialog } from '@/components/EditProfileDialog';
 
 const PatientProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [patientInfo, setPatientInfo] = useState<any>(null);
+  const [healthRecords, setHealthRecords] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPatientInfo();
+      fetchHealthRecords();
+    }
+  }, [user]);
+
+  const fetchPatientInfo = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('patients_info')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setPatientInfo(data);
+    } catch (error: any) {
+      console.error('Error fetching patient info:', error);
+    }
+  };
+
+  const fetchHealthRecords = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('patient_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setHealthRecords(data || []);
+    } catch (error: any) {
+      console.error('Error fetching health records:', error);
+    }
+  };
 
   const profileDetails = [
     { icon: User, label: 'Name', value: user?.user_metadata?.name || 'N/A' },
     { icon: Mail, label: 'Email', value: user?.email || 'N/A' },
     { icon: Phone, label: 'Phone', value: user?.user_metadata?.phone || 'Not provided' },
-    { icon: Droplet, label: 'Blood Group', value: 'Not provided' },
-    { icon: MapPin, label: 'Address', value: 'Not provided' },
+    { icon: Droplet, label: 'Blood Group', value: patientInfo?.blood_group || 'Not provided' },
+    { icon: MapPin, label: 'Address', value: patientInfo?.address || 'Not provided' },
   ];
 
-  const reports = mockHealthRecords.filter(r => r.type === 'report');
-  const prescriptions = mockHealthRecords.filter(r => r.type === 'prescription');
+  const reports = healthRecords.filter(r => r.type === 'report');
+  const prescriptions = healthRecords.filter(r => r.type === 'prescription');
 
   return (
     <DashboardLayout title="Patient Profile">
@@ -51,7 +96,7 @@ const PatientProfile = () => {
                   </div>
                 );
               })}
-              <Button variant="outline" className="w-full">Edit Profile</Button>
+              {user && <EditProfileDialog user={user} onUpdate={fetchPatientInfo} />}
             </CardContent>
           </Card>
 
@@ -62,7 +107,7 @@ const PatientProfile = () => {
                 <CardTitle className="text-base">Age</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-primary">N/A</p>
+                <p className="text-3xl font-bold text-primary">{patientInfo?.age || 'N/A'}</p>
                 <p className="text-sm text-muted-foreground">years old</p>
               </CardContent>
             </Card>
@@ -72,7 +117,7 @@ const PatientProfile = () => {
                 <CardTitle className="text-base">Total Records</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-secondary">{mockHealthRecords.length}</p>
+                <p className="text-3xl font-bold text-secondary">{healthRecords.length}</p>
                 <p className="text-sm text-muted-foreground">health documents</p>
               </CardContent>
             </Card>

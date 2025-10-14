@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -8,52 +8,96 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Trash2, Clock } from 'lucide-react';
-import { mockDoctors } from '@/lib/mockData';
-import { TimeSlot } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const ManageSlots = () => {
   const navigate = useNavigate();
-  const doctor = mockDoctors[0]; // Current doctor
-  
-  const [slots, setSlots] = useState<TimeSlot[]>(doctor.availableSlots || []);
+  const { user } = useAuth();
+  const [slots, setSlots] = useState<any[]>([]);
   const [newSlot, setNewSlot] = useState({
     day: '',
     startTime: '',
     endTime: '',
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchSlots();
+    }
+  }, [user]);
+
+  const fetchSlots = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('time_slots')
+        .select('*')
+        .eq('doctor_id', user.id)
+        .order('day', { ascending: true });
+
+      if (error) throw error;
+      setSlots(data || []);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const handleAddSlot = () => {
-    if (!newSlot.day || !newSlot.startTime || !newSlot.endTime) {
+  const handleAddSlot = async () => {
+    if (!newSlot.day || !newSlot.startTime || !newSlot.endTime || !user) {
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
 
-    const slot: TimeSlot = {
-      id: `slot-${Date.now()}`,
-      day: newSlot.day,
-      startTime: newSlot.startTime,
-      endTime: newSlot.endTime,
-      isBooked: false,
-    };
+    try {
+      const { error } = await supabase
+        .from('time_slots')
+        .insert({
+          doctor_id: user.id,
+          day: newSlot.day,
+          start_time: newSlot.startTime,
+          end_time: newSlot.endTime,
+          is_booked: false
+        });
 
-    setSlots([...slots, slot]);
-    setNewSlot({ day: '', startTime: '', endTime: '' });
-    toast({ title: 'Success', description: 'Slot added successfully' });
+      if (error) throw error;
+
+      setNewSlot({ day: '', startTime: '', endTime: '' });
+      toast({ title: 'Success', description: 'Slot added successfully' });
+      fetchSlots();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
   };
 
-  const handleDeleteSlot = (slotId: string) => {
-    setSlots(slots.filter(s => s.id !== slotId));
-    toast({ title: 'Success', description: 'Slot removed' });
+  const handleDeleteSlot = async (slotId: string) => {
+    try {
+      const { error } = await supabase
+        .from('time_slots')
+        .delete()
+        .eq('id', slotId);
+
+      if (error) throw error;
+
+      toast({ title: 'Success', description: 'Slot removed' });
+      fetchSlots();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
   };
 
   const groupedSlots = slots.reduce((acc, slot) => {
     if (!acc[slot.day]) acc[slot.day] = [];
     acc[slot.day].push(slot);
     return acc;
-  }, {} as Record<string, TimeSlot[]>);
+  }, {} as Record<string, any[]>);
 
   return (
     <DashboardLayout title="Manage Availability Slots">
@@ -148,14 +192,14 @@ const ManageSlots = () => {
                             <div className="flex items-center gap-3">
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               <div>
-                                <p className="font-medium">{slot.startTime} - {slot.endTime}</p>
-                                {slot.isBooked && slot.patientId && (
+                                <p className="font-medium">{slot.start_time} - {slot.end_time}</p>
+                                {slot.is_booked && slot.patient_id && (
                                   <p className="text-xs text-muted-foreground">Booked</p>
                                 )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {slot.isBooked ? (
+                              {slot.is_booked ? (
                                 <Badge variant="secondary">Booked</Badge>
                               ) : (
                                 <Badge className="bg-secondary">Available</Badge>
@@ -164,7 +208,7 @@ const ManageSlots = () => {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteSlot(slot.id)}
-                                disabled={slot.isBooked}
+                                disabled={slot.is_booked}
                                 aria-label="Delete slot"
                               >
                                 <Trash2 className="h-4 w-4" />
