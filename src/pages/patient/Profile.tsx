@@ -7,6 +7,7 @@ import { ArrowLeft, User, Phone, Mail, Droplet, MapPin, FileText, Download } fro
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfileDialog } from '@/components/EditProfileDialog';
+import { HealthDocumentUpload } from '@/components/HealthDocumentUpload';
 
 const PatientProfile = () => {
   const navigate = useNavigate();
@@ -122,6 +123,11 @@ const PatientProfile = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Upload Health Document */}
+        <div className="mt-6">
+          <HealthDocumentUpload onUploadComplete={fetchHealthRecords} />
         </div>
 
         {/* Medical Reports */}

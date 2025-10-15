@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -9,15 +9,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, User, Mail, Briefcase, GraduationCap, MapPin, Award, Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.name || '',
     email: user?.email || '',
+    phone: user?.user_metadata?.phone || '',
     specialty: '',
     experience: 0,
     qualification: '',
@@ -26,14 +29,88 @@ const DoctorProfile = () => {
     achievements: '',
   });
 
-  const handleSave = () => {
-    setIsEditing(false);
-    toast({ title: 'Success', description: 'Profile updated successfully' });
+  useEffect(() => {
+    if (user) {
+      fetchDoctorInfo();
+    }
+  }, [user]);
+
+  const fetchDoctorInfo = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('doctors_info')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (data) {
+        setFormData(prev => ({
+          ...prev,
+          specialty: data.specialty || '',
+          experience: data.experience || 0,
+          qualification: data.qualification || '',
+          clinicAddress: data.clinic_address || '',
+          about: data.about || '',
+          achievements: data.achievements?.join(', ') || '',
+        }));
+      }
+    } catch (error: any) {
+      console.error('Error fetching doctor info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: formData.name,
+          phone: formData.phone
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Update or insert doctor info
+      const achievementsArray = formData.achievements
+        .split(',')
+        .map(a => a.trim())
+        .filter(a => a.length > 0);
+
+      const { error: doctorError } = await supabase
+        .from('doctors_info')
+        .upsert({
+          user_id: user.id,
+          specialty: formData.specialty,
+          experience: formData.experience,
+          qualification: formData.qualification,
+          clinic_address: formData.clinicAddress,
+          about: formData.about,
+          achievements: achievementsArray.length > 0 ? achievementsArray : null,
+        });
+
+      if (doctorError) throw doctorError;
+
+      setIsEditing(false);
+      toast({ title: 'Success', description: 'Profile updated successfully' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
   };
 
   const personalInfo = [
     { icon: User, label: 'Name', value: formData.name, field: 'name' },
     { icon: Mail, label: 'Email', value: formData.email, field: 'email' },
+    { icon: User, label: 'Phone', value: formData.phone, field: 'phone' },
   ];
 
   const professionalInfo = [

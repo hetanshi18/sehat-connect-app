@@ -29,7 +29,7 @@ const Consult = () => {
         .from('doctors_info')
         .select(`
           *,
-          profiles!doctors_info_user_id_fkey (name, email)
+          profiles!inner(name, email)
         `);
 
       if (error) throw error;

@@ -30,7 +30,7 @@ const ViewAppointments = () => {
         .from('appointments')
         .select(`
           *,
-          profiles!appointments_patient_id_fkey (name, email)
+          profiles!inner(name, email)
         `)
         .eq('doctor_id', user.id)
         .order('created_at', { ascending: false });
