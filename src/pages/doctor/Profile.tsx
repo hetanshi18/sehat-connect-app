@@ -18,9 +18,9 @@ const DoctorProfile = () => {
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState({
-    name: user?.user_metadata?.name || '',
-    email: user?.email || '',
-    phone: user?.user_metadata?.phone || '',
+    name: '',
+    email: '',
+    phone: '',
     specialty: '',
     experience: 0,
     qualification: '',
@@ -39,27 +39,38 @@ const DoctorProfile = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch profile data
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Fetch doctor info
+      const { data: doctorData, error: doctorError } = await supabase
         .from('doctors_info')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (doctorError && doctorError.code !== 'PGRST116') throw doctorError;
       
-      if (data) {
-        setFormData(prev => ({
-          ...prev,
-          specialty: data.specialty || '',
-          experience: data.experience || 0,
-          qualification: data.qualification || '',
-          clinicAddress: data.clinic_address || '',
-          about: data.about || '',
-          achievements: data.achievements?.join(', ') || '',
-        }));
-      }
+      setFormData({
+        name: profileData?.name || '',
+        email: profileData?.email || '',
+        phone: profileData?.phone || '',
+        specialty: doctorData?.specialty || '',
+        experience: doctorData?.experience || 0,
+        qualification: doctorData?.qualification || '',
+        clinicAddress: doctorData?.clinic_address || '',
+        about: doctorData?.about || '',
+        achievements: doctorData?.achievements?.join(', ') || '',
+      });
     } catch (error: any) {
       console.error('Error fetching doctor info:', error);
+      toast({ title: 'Error', description: 'Failed to load profile data', variant: 'destructive' });
     } finally {
       setLoading(false);
     }

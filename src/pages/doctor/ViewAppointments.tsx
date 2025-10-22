@@ -30,7 +30,12 @@ const ViewAppointments = () => {
         .from('appointments')
         .select(`
           *,
-          profiles!inner(name, email)
+          profiles!patient_id (
+            id,
+            name,
+            email,
+            phone
+          )
         `)
         .eq('doctor_id', user.id)
         .order('created_at', { ascending: false });
@@ -121,7 +126,10 @@ const ViewAppointments = () => {
                           </div>
                           <div>
                             <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
-                            <CardDescription>{apt.profiles?.email}</CardDescription>
+                            <CardDescription>
+                              <p>{apt.profiles?.email}</p>
+                              {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
+                            </CardDescription>
                           </div>
                         </div>
                         <Badge className="bg-yellow-500">Pending</Badge>
@@ -184,7 +192,10 @@ const ViewAppointments = () => {
                           </div>
                           <div>
                             <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
-                            <CardDescription>{apt.profiles?.email}</CardDescription>
+                            <CardDescription>
+                              <p>{apt.profiles?.email}</p>
+                              {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
+                            </CardDescription>
                           </div>
                         </div>
                         <Badge className="bg-accent">Scheduled</Badge>
@@ -252,7 +263,10 @@ const ViewAppointments = () => {
                           </div>
                           <div>
                             <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
-                            <CardDescription>{apt.profiles?.email}</CardDescription>
+                            <CardDescription>
+                              <p>{apt.profiles?.email}</p>
+                              {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
+                            </CardDescription>
                           </div>
                         </div>
                         <Badge className="bg-secondary">Completed</Badge>

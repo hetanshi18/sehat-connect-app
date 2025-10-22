@@ -12,9 +12,9 @@ const DoctorDashboard = () => {
   const totalPatients = new Set(mockAppointments.map(apt => apt.patientId)).size;
 
   const menuItems = [
-    { title: "Today's Appointments", description: `${todaysAppointments} scheduled today`, icon: Calendar, path: '/doctor/appointments', color: 'bg-gradient-primary', count: todaysAppointments },
-    { title: 'Patient Records', description: 'View patient histories', icon: Users, path: '/doctor/appointments', color: 'bg-gradient-secondary', count: totalPatients },
-    { title: 'Manage Slots', description: 'Set your availability', icon: Clock, path: '/doctor/slots', color: 'bg-gradient-warm', count: null },
+    { title: "Today's Appointments", description: `${todaysAppointments} scheduled today`, icon: Calendar, path: '/doctor/view-appointments', color: 'bg-gradient-primary', count: todaysAppointments },
+    { title: 'Patient Records', description: 'View patient histories', icon: Users, path: '/doctor/view-appointments', color: 'bg-gradient-secondary', count: totalPatients },
+    { title: 'Manage Slots', description: 'Set your availability', icon: Clock, path: '/doctor/manage-slots', color: 'bg-gradient-warm', count: null },
     { title: 'My Profile', description: 'Update professional details', icon: User, path: '/doctor/profile', color: 'bg-primary', count: null },
   ];
 
@@ -109,7 +109,7 @@ const DoctorDashboard = () => {
                       )}
                     </div>
                   </div>
-                  <Button onClick={() => navigate('/doctor/appointments')}>View Details</Button>
+                  <Button onClick={() => navigate('/doctor/view-appointments')}>View Details</Button>
                 </div>
               ))}
               {mockAppointments.filter(apt => apt.status === 'scheduled').length === 0 && (

@@ -28,8 +28,19 @@ const Consult = () => {
       const { data, error } = await supabase
         .from('doctors_info')
         .select(`
-          *,
-          profiles!inner(name, email)
+          user_id,
+          specialty,
+          experience,
+          qualification,
+          clinic_address,
+          about,
+          achievements,
+          profiles!user_id (
+            id,
+            name,
+            email,
+            phone
+          )
         `);
 
       if (error) throw error;
@@ -99,7 +110,7 @@ const Consult = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {doctors.map((doctor) => (
-              <Card key={doctor.id} className="shadow-soft hover:shadow-medium transition-all">
+              <Card key={doctor.user_id} className="shadow-soft hover:shadow-medium transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-primary text-white text-2xl font-bold">
@@ -111,17 +122,20 @@ const Consult = () => {
                     </div>
                   </div>
                   <CardTitle className="mt-3">{doctor.profiles?.name || 'Doctor'}</CardTitle>
-                  <CardDescription>{doctor.specialty}</CardDescription>
+                  <CardDescription>
+                    <div className="space-y-1">
+                      <p className="font-medium">{doctor.specialty} • {doctor.experience} years</p>
+                      <p className="text-xs">{doctor.qualification}</p>
+                    </div>
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Experience</span>
-                    <span className="font-medium">{doctor.experience} years</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Qualification</span>
-                    <span className="font-medium">{doctor.qualification}</span>
-                  </div>
+                  {doctor.about && (
+                    <p className="text-sm text-muted-foreground line-clamp-3">{doctor.about}</p>
+                  )}
+                  {doctor.clinic_address && (
+                    <p className="text-xs text-muted-foreground">📍 {doctor.clinic_address}</p>
+                  )}
                 
                   <Dialog>
                     <DialogTrigger asChild>
