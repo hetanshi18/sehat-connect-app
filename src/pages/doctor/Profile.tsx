@@ -77,8 +77,12 @@ const DoctorProfile = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user) {
+      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
+      return;
+    }
 
+    setLoading(true);
     try {
       // Update profile
       const { error: profileError } = await supabase
@@ -89,7 +93,10 @@ const DoctorProfile = () => {
         })
         .eq('id', user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
 
       // Update or insert doctor info
       const achievementsArray = formData.achievements
@@ -102,19 +109,34 @@ const DoctorProfile = () => {
         .upsert({
           user_id: user.id,
           specialty: formData.specialty,
-          experience: formData.experience,
+          experience: Number(formData.experience),
           qualification: formData.qualification,
           clinic_address: formData.clinicAddress,
           about: formData.about,
           achievements: achievementsArray.length > 0 ? achievementsArray : null,
+        }, {
+          onConflict: 'user_id'
         });
 
-      if (doctorError) throw doctorError;
+      if (doctorError) {
+        console.error('Doctor info update error:', doctorError);
+        throw doctorError;
+      }
 
       setIsEditing(false);
       toast({ title: 'Success', description: 'Profile updated successfully' });
+      
+      // Refresh data
+      await fetchDoctorInfo();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      console.error('Save error:', error);
+      toast({ 
+        title: 'Error', 
+        description: error.message || 'Failed to update profile', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,9 +160,12 @@ const DoctorProfile = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Button>
-          <Button onClick={() => isEditing ? handleSave() : setIsEditing(true)}>
+          <Button 
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            disabled={loading}
+          >
             <Edit className="mr-2 h-4 w-4" />
-            {isEditing ? 'Save Changes' : 'Edit Profile'}
+            {loading ? 'Saving...' : isEditing ? 'Save Changes' : 'Edit Profile'}
           </Button>
         </div>
 
@@ -164,7 +189,8 @@ const DoctorProfile = () => {
                       id={detail.field}
                       value={formData[detail.field as keyof typeof formData]}
                       onChange={(e) => setFormData({ ...formData, [detail.field]: e.target.value })}
-                      disabled={!isEditing}
+                      disabled={!isEditing || detail.field === 'email'}
+                      className={detail.field === 'email' ? 'bg-muted' : ''}
                     />
                   </div>
                 );
