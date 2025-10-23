@@ -53,7 +53,7 @@ const ViewAppointments = () => {
     try {
       const { error: aptError } = await supabase
         .from('appointments')
-        .update({ status: 'scheduled' })
+        .update({ status: 'confirmed' })
         .eq('id', appointmentId);
 
       if (aptError) throw aptError;
@@ -65,23 +65,23 @@ const ViewAppointments = () => {
 
       if (slotError) throw slotError;
 
-      toast({ title: 'Success', description: 'Appointment approved!' });
+      toast({ title: 'Success', description: 'Appointment confirmed successfully!' });
       fetchAppointments();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
 
-  const handleDecline = async (appointmentId: string) => {
+  const handleReject = async (appointmentId: string) => {
     try {
       const { error } = await supabase
         .from('appointments')
-        .update({ status: 'cancelled' })
+        .update({ status: 'rejected' })
         .eq('id', appointmentId);
 
       if (error) throw error;
 
-      toast({ title: 'Success', description: 'Appointment declined' });
+      toast({ title: 'Success', description: 'Appointment rejected' });
       fetchAppointments();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -89,7 +89,7 @@ const ViewAppointments = () => {
   };
 
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
-  const scheduledAppointments = appointments.filter(apt => apt.status === 'scheduled');
+  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
   const completedAppointments = appointments.filter(apt => apt.status === 'completed');
 
   return (
@@ -103,7 +103,7 @@ const ViewAppointments = () => {
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="pending">Pending ({pendingAppointments.length})</TabsTrigger>
-            <TabsTrigger value="scheduled">Scheduled ({scheduledAppointments.length})</TabsTrigger>
+            <TabsTrigger value="confirmed">Confirmed ({confirmedAppointments.length})</TabsTrigger>
             <TabsTrigger value="completed">Completed ({completedAppointments.length})</TabsTrigger>
           </TabsList>
 
@@ -160,10 +160,10 @@ const ViewAppointments = () => {
                         <Button 
                           variant="destructive" 
                           className="flex-1"
-                          onClick={() => handleDecline(apt.id)}
+                          onClick={() => handleReject(apt.id)}
                         >
                           <X className="mr-2 h-4 w-4" />
-                          Decline
+                          Reject
                         </Button>
                       </div>
                     </CardContent>
@@ -173,16 +173,16 @@ const ViewAppointments = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="scheduled" className="mt-6">
+          <TabsContent value="confirmed" className="mt-6">
             <div className="space-y-4">
-              {scheduledAppointments.length === 0 ? (
+              {confirmedAppointments.length === 0 ? (
                 <Card className="shadow-soft">
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No scheduled appointments
+                    No confirmed appointments
                   </CardContent>
                 </Card>
               ) : (
-                scheduledAppointments.map((apt) => (
+                confirmedAppointments.map((apt) => (
                   <Card key={apt.id} className="shadow-soft hover:shadow-medium transition-all">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -198,7 +198,7 @@ const ViewAppointments = () => {
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge className="bg-accent">Scheduled</Badge>
+                        <Badge className="bg-green-500">Confirmed</Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
