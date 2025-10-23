@@ -62,6 +62,20 @@ export type Database = {
             referencedRelation: "time_slots"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_appointments_doctor"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_appointments_patient"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       doctors_info: {
@@ -70,10 +84,10 @@ export type Database = {
           achievements: string[] | null
           clinic_address: string | null
           created_at: string
-          experience: number
+          experience: number | null
           id: string
-          qualification: string
-          specialty: string
+          qualification: string | null
+          specialty: string | null
           updated_at: string
           user_id: string
         }
@@ -82,10 +96,10 @@ export type Database = {
           achievements?: string[] | null
           clinic_address?: string | null
           created_at?: string
-          experience?: number
+          experience?: number | null
           id?: string
-          qualification: string
-          specialty: string
+          qualification?: string | null
+          specialty?: string | null
           updated_at?: string
           user_id: string
         }
@@ -94,14 +108,22 @@ export type Database = {
           achievements?: string[] | null
           clinic_address?: string | null
           created_at?: string
-          experience?: number
+          experience?: number | null
           id?: string
-          qualification?: string
-          specialty?: string
+          qualification?: string | null
+          specialty?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_doctors_info_profiles"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       health_records: {
         Row: {
@@ -199,6 +221,7 @@ export type Database = {
           id: string
           name: string
           phone: string | null
+          role: string | null
           updated_at: string
         }
         Insert: {
@@ -207,6 +230,7 @@ export type Database = {
           id: string
           name: string
           phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Update: {
@@ -215,6 +239,7 @@ export type Database = {
           id?: string
           name?: string
           phone?: string | null
+          role?: string | null
           updated_at?: string
         }
         Relationships: []
