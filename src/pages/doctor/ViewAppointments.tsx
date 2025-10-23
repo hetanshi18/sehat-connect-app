@@ -49,7 +49,7 @@ const ViewAppointments = () => {
     }
   };
 
-  const handleApprove = async (appointmentId: string, slotId: string) => {
+  const handleApprove = async (appointmentId: string, slotId: string, patientId: string) => {
     try {
       const { error: aptError } = await supabase
         .from('appointments')
@@ -60,7 +60,7 @@ const ViewAppointments = () => {
 
       const { error: slotError } = await supabase
         .from('time_slots')
-        .update({ is_booked: true, patient_id: user?.id })
+        .update({ is_booked: true, patient_id: patientId })
         .eq('id', slotId);
 
       if (slotError) throw slotError;
@@ -152,7 +152,7 @@ const ViewAppointments = () => {
                       <div className="flex gap-2 pt-2">
                         <Button 
                           className="flex-1" 
-                          onClick={() => handleApprove(apt.id, apt.slot_id)}
+                          onClick={() => handleApprove(apt.id, apt.slot_id, apt.patient_id)}
                         >
                           <Check className="mr-2 h-4 w-4" />
                           Approve
