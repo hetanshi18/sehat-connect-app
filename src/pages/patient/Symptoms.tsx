@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, AlertCircle, FileText } from 'lucide-react';
+import { ArrowLeft, AlertCircle, FileText, Download } from 'lucide-react';
 import { mockSymptoms } from '@/lib/mockData';
 import { toast } from '@/hooks/use-toast';
 
@@ -32,6 +32,38 @@ const Symptoms = () => {
     }
     setShowReport(true);
     toast({ title: 'Success', description: 'Symptoms recorded successfully' });
+  };
+
+  const handleDownloadReport = () => {
+    const selectedSymptomNames = mockSymptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name);
+    const reportContent = `
+SYMPTOM ANALYSIS REPORT
+Generated on ${new Date().toLocaleDateString()}
+
+REPORTED SYMPTOMS:
+${selectedSymptomNames.map(name => `• ${name}`).join('\n')}
+
+${additionalNotes ? `ADDITIONAL NOTES:\n${additionalNotes}\n\n` : ''}
+PRELIMINARY ADVICE:
+Based on your symptoms, we recommend:
+• Rest and stay hydrated
+• Monitor temperature if fever persists
+• Consult a doctor if symptoms worsen
+• Avoid self-medication without professional advice
+
+This is a preliminary report. Please consult with a healthcare professional for proper diagnosis and treatment.
+    `;
+
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `symptom-report-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast({ title: 'Success', description: 'Report downloaded successfully' });
   };
 
   if (showReport) {
@@ -88,13 +120,19 @@ const Symptoms = () => {
                 </p>
               </div>
               
-              <div className="flex gap-3">
-                <Button onClick={() => navigate('/consult')} className="flex-1">
-                  Book Consultation
+              <div className="flex flex-col gap-3">
+                <Button onClick={handleDownloadReport} variant="outline" className="w-full">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Report
                 </Button>
-                <Button variant="outline" onClick={() => setShowReport(false)} className="flex-1">
-                  Record New Symptoms
-                </Button>
+                <div className="flex gap-3">
+                  <Button onClick={() => navigate('/consult')} className="flex-1">
+                    Book Consultation
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowReport(false)} className="flex-1">
+                    Record New Symptoms
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

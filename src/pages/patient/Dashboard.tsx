@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock } from 'lucide-react';
+import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock, User } from 'lucide-react';
 import { mockAppointments } from '@/lib/mockData';
 
 const PatientDashboard = () => {
@@ -16,6 +16,7 @@ const PatientDashboard = () => {
     { title: 'Book Consultation', description: 'Schedule a doctor appointment', icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
     { title: 'Record Symptoms', description: 'Log your current symptoms', icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
     { title: 'Health Trends', description: 'View your health analytics', icon: TrendingUp, path: '/trends', color: 'bg-primary' },
+    { title: 'My Profile', description: 'View and edit your profile', icon: User, path: '/profile', color: 'bg-accent' },
   ];
 
   return (
