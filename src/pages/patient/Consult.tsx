@@ -23,6 +23,31 @@ const Consult = () => {
     fetchDoctors();
   }, []);
 
+  // Real-time subscription for slot changes
+  useEffect(() => {
+    if (!selectedDoctor) return;
+
+    const channel = supabase
+      .channel('time-slots-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'time_slots',
+          filter: `doctor_id=eq.${selectedDoctor}`
+        },
+        () => {
+          fetchTimeSlots(selectedDoctor);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedDoctor]);
+
   const fetchDoctors = async () => {
     try {
       const { data, error } = await supabase
@@ -54,12 +79,11 @@ const Consult = () => {
 
   const fetchTimeSlots = async (doctorId: string) => {
     try {
-      // Fetch only available slots (is_available = true)
+      // Fetch all slots to show availability status
       const { data: slots, error } = await supabase
         .from('time_slots')
         .select('*')
         .eq('doctor_id', doctorId)
-        .eq('is_available', true)
         .order('day', { ascending: true });
 
       if (error) throw error;
@@ -96,10 +120,14 @@ const Consult = () => {
 
       if (appointmentError) throw appointmentError;
 
-      // Immediately mark slot as unavailable
+      // Mark slot as pending with patient_id
       const { error: slotError } = await supabase
         .from('time_slots')
-        .update({ is_available: false })
+        .update({ 
+          status: 'pending',
+          patient_id: user.id,
+          is_available: false 
+        })
         .eq('id', selectedSlot.id);
 
       if (slotError) throw slotError;
@@ -179,21 +207,36 @@ const Consult = () => {
                             <h4 className="mb-3 font-semibold">Available Slots</h4>
                             {timeSlots.length === 0 ? (
                               <p className="text-sm text-muted-foreground py-4 text-center">
-                                No available slots at the moment
+                                No slots available
                               </p>
                             ) : (
                               <div className="grid gap-2 max-h-64 overflow-y-auto">
-                                {timeSlots.map((slot) => (
-                                  <Button
-                                    key={slot.id}
-                                    variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
-                                    className="justify-start w-full"
-                                    onClick={() => setSelectedSlot(slot)}
-                                  >
-                                    <Calendar className="mr-2 h-4 w-4" />
-                                    {slot.day} • {slot.start_time} - {slot.end_time}
-                                  </Button>
-                                ))}
+                                {timeSlots.map((slot) => {
+                                  const isAvailable = slot.status === 'available';
+                                  const isPendingForOther = slot.status === 'pending' && slot.patient_id !== user?.id;
+                                  const isPendingForMe = slot.status === 'pending' && slot.patient_id === user?.id;
+                                  const isBooked = slot.status === 'booked';
+                                  
+                                  return (
+                                    <Button
+                                      key={slot.id}
+                                      variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
+                                      className={`justify-start w-full ${
+                                        isPendingForOther || isBooked
+                                          ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
+                                          : ''
+                                      } ${isPendingForMe ? 'border-yellow-500 bg-yellow-50' : ''}`}
+                                      onClick={() => isAvailable ? setSelectedSlot(slot) : null}
+                                      disabled={isPendingForOther || isBooked}
+                                    >
+                                      <Calendar className="mr-2 h-4 w-4" />
+                                      {slot.day} • {slot.start_time} - {slot.end_time}
+                                      {isPendingForMe && <Badge className="ml-2 bg-yellow-500">Pending</Badge>}
+                                      {isPendingForOther && <Badge className="ml-2" variant="secondary">Reserved</Badge>}
+                                      {isBooked && <Badge className="ml-2" variant="secondary">Booked</Badge>}
+                                    </Button>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>

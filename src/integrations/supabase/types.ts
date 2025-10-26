@@ -335,6 +335,7 @@ export type Database = {
           is_booked: boolean
           patient_id: string | null
           start_time: string
+          status: string
         }
         Insert: {
           created_at?: string
@@ -346,6 +347,7 @@ export type Database = {
           is_booked?: boolean
           patient_id?: string | null
           start_time: string
+          status?: string
         }
         Update: {
           created_at?: string
@@ -357,6 +359,7 @@ export type Database = {
           is_booked?: boolean
           patient_id?: string | null
           start_time?: string
+          status?: string
         }
         Relationships: []
       }

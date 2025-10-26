@@ -66,7 +66,12 @@ const ViewAppointments = () => {
 
       const { error: slotError } = await supabase
         .from('time_slots')
-        .update({ is_available: false, patient_id: patientId })
+        .update({ 
+          status: 'booked',
+          is_available: false, 
+          is_booked: true,
+          patient_id: patientId 
+        })
         .eq('id', slotId);
 
       if (slotError) throw slotError;
@@ -97,7 +102,12 @@ const ViewAppointments = () => {
       // Free up the slot - make it available again
       const { error: slotError } = await supabase
         .from('time_slots')
-        .update({ is_available: true, patient_id: null })
+        .update({ 
+          status: 'available',
+          is_available: true, 
+          is_booked: false,
+          patient_id: null 
+        })
         .eq('id', slotId);
 
       if (slotError) throw slotError;
