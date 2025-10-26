@@ -73,7 +73,7 @@ const PatientHistory = () => {
         .select(`
           patient_id,
           status,
-          profiles!appointments_patient_id_fkey (
+          profiles!appointments_patient_fkey (
             id,
             name,
             email,

@@ -31,7 +31,7 @@ const DoctorDashboard = () => {
         .from('appointments')
         .select(`
           *,
-          profiles!appointments_patient_id_fkey (
+          profiles!appointments_patient_fkey (
             name,
             phone
           )
