@@ -30,7 +30,7 @@ const ViewAppointments = () => {
         .from('appointments')
         .select(`
           *,
-          profiles!patient_id (
+          profiles!appointments_patient_fkey (
             id,
             name,
             email,
