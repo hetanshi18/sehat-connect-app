@@ -75,6 +75,29 @@ const Consult = () => {
     }
 
     try {
+      // Check for existing appointments for this slot
+      const { data: existingAppointments, error: checkError } = await supabase
+        .from('appointments')
+        .select('id, status')
+        .eq('doctor_id', selectedDoctor)
+        .eq('date', selectedSlot.day)
+        .eq('time', `${selectedSlot.start_time} - ${selectedSlot.end_time}`)
+        .in('status', ['pending', 'confirmed']);
+
+      if (checkError) throw checkError;
+
+      if (existingAppointments && existingAppointments.length > 0) {
+        toast({ 
+          title: 'Slot Unavailable', 
+          description: 'This slot is already booked or awaiting confirmation. Please select another time.', 
+          variant: 'destructive' 
+        });
+        // Refresh slots to show updated availability
+        fetchTimeSlots(selectedDoctor);
+        setSelectedSlot(null);
+        return;
+      }
+
       // Create appointment
       const { error: appointmentError } = await supabase
         .from('appointments')

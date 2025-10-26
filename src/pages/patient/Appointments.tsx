@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Clock, User, FileText, Check, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Stethoscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 
-const ViewAppointments = () => {
+const Appointments = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -30,14 +30,14 @@ const ViewAppointments = () => {
         .from('appointments')
         .select(`
           *,
-          profiles!patient_id (
+          profiles!doctor_id (
             id,
             name,
             email,
             phone
           )
         `)
-        .eq('doctor_id', user.id)
+        .eq('patient_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -49,62 +49,27 @@ const ViewAppointments = () => {
     }
   };
 
-  const handleApprove = async (appointmentId: string, slotId: string, patientId: string) => {
-    try {
-      const { error: aptError } = await supabase
-        .from('appointments')
-        .update({ status: 'confirmed' })
-        .eq('id', appointmentId);
-
-      if (aptError) throw aptError;
-
-      const { error: slotError } = await supabase
-        .from('time_slots')
-        .update({ is_booked: true, patient_id: patientId })
-        .eq('id', slotId);
-
-      if (slotError) throw slotError;
-
-      toast({ title: 'Success', description: 'Appointment confirmed successfully!' });
-      fetchAppointments();
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    }
-  };
-
-  const handleReject = async (appointmentId: string, slotId: string) => {
-    try {
-      // Update appointment status to rejected
-      const { error: aptError } = await supabase
-        .from('appointments')
-        .update({ status: 'rejected' })
-        .eq('id', appointmentId);
-
-      if (aptError) throw aptError;
-
-      // Free up the slot
-      const { error: slotError } = await supabase
-        .from('time_slots')
-        .update({ is_booked: false, patient_id: null })
-        .eq('id', slotId);
-
-      if (slotError) throw slotError;
-
-      toast({ title: 'Success', description: 'Appointment rejected. Slot is now available again.' });
-      fetchAppointments();
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    }
-  };
-
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
   const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
-  const completedAppointments = appointments.filter(apt => apt.status === 'completed');
+  const rejectedAppointments = appointments.filter(apt => apt.status === 'rejected');
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-500">Awaiting Doctor Approval</Badge>;
+      case 'confirmed':
+        return <Badge className="bg-green-500">Appointment Confirmed</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
 
   return (
-    <DashboardLayout title="View Appointments">
+    <DashboardLayout title="My Appointments">
       <div className="max-w-5xl">
-        <Button variant="ghost" onClick={() => navigate('/doctor/dashboard')} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
@@ -113,7 +78,7 @@ const ViewAppointments = () => {
           <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="pending">Pending ({pendingAppointments.length})</TabsTrigger>
             <TabsTrigger value="confirmed">Confirmed ({confirmedAppointments.length})</TabsTrigger>
-            <TabsTrigger value="completed">Completed ({completedAppointments.length})</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected ({rejectedAppointments.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="mt-6">
@@ -131,20 +96,20 @@ const ViewAppointments = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary text-white text-lg font-bold">
-                            {apt.profiles?.name?.[0] || 'P'}
+                            <Stethoscope className="h-6 w-6" />
                           </div>
                           <div>
-                            <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
+                            <CardTitle className="text-lg">Dr. {apt.profiles?.name || 'Doctor'}</CardTitle>
                             <CardDescription>
                               <p>{apt.profiles?.email}</p>
                               {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge className="bg-yellow-500">Pending</Badge>
+                        {getStatusBadge(apt.status)}
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-3">
                       <div className="grid gap-3 md:grid-cols-2">
                         <div className="flex items-center gap-2 text-sm">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -157,24 +122,9 @@ const ViewAppointments = () => {
                           <span>{apt.time}</span>
                         </div>
                       </div>
-
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          className="flex-1" 
-                          onClick={() => handleApprove(apt.id, apt.slot_id, apt.patient_id)}
-                        >
-                          <Check className="mr-2 h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          className="flex-1"
-                          onClick={() => handleReject(apt.id, apt.slot_id)}
-                        >
-                          <X className="mr-2 h-4 w-4" />
-                          Reject
-                        </Button>
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Request sent — Awaiting doctor approval
+                      </p>
                     </CardContent>
                   </Card>
                 ))
@@ -197,17 +147,17 @@ const ViewAppointments = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary text-white text-lg font-bold">
-                            {apt.profiles?.name?.[0] || 'P'}
+                            <Stethoscope className="h-6 w-6" />
                           </div>
                           <div>
-                            <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
+                            <CardTitle className="text-lg">Dr. {apt.profiles?.name || 'Doctor'}</CardTitle>
                             <CardDescription>
                               <p>{apt.profiles?.email}</p>
                               {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge className="bg-green-500">Confirmed</Badge>
+                        {getStatusBadge(apt.status)}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -223,29 +173,7 @@ const ViewAppointments = () => {
                           <span>{apt.time}</span>
                         </div>
                       </div>
-
-                      {apt.symptoms && apt.symptoms.length > 0 && (
-                        <div className="rounded-lg bg-muted p-4">
-                          <p className="text-sm font-medium mb-2">Reported Symptoms:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {apt.symptoms.map((symptom) => (
-                              <Badge key={symptom} variant="secondary">{symptom}</Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {apt.notes && (
-                        <div className="rounded-lg bg-muted p-4">
-                          <p className="text-sm font-medium mb-2">Patient Notes:</p>
-                          <p className="text-sm text-muted-foreground">{apt.notes}</p>
-                        </div>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <Button className="flex-1">Start Consultation</Button>
-                        <Button variant="outline" className="flex-1">View Patient History</Button>
-                      </div>
+                      <Button className="w-full">Join Consultation</Button>
                     </CardContent>
                   </Card>
                 ))
@@ -253,32 +181,31 @@ const ViewAppointments = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="completed" className="mt-6">
+          <TabsContent value="rejected" className="mt-6">
             <div className="space-y-4">
-              {completedAppointments.length === 0 ? (
+              {rejectedAppointments.length === 0 ? (
                 <Card className="shadow-soft">
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No completed appointments
+                    No rejected appointments
                   </CardContent>
                 </Card>
               ) : (
-                completedAppointments.map((apt) => (
+                rejectedAppointments.map((apt) => (
                   <Card key={apt.id} className="shadow-soft">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-secondary text-white text-lg font-bold">
-                            {apt.profiles?.name?.[0] || 'P'}
+                          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground text-lg font-bold">
+                            <Stethoscope className="h-6 w-6" />
                           </div>
                           <div>
-                            <CardTitle className="text-lg">{apt.profiles?.name || 'Patient'}</CardTitle>
+                            <CardTitle className="text-lg">Dr. {apt.profiles?.name || 'Doctor'}</CardTitle>
                             <CardDescription>
                               <p>{apt.profiles?.email}</p>
-                              {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge className="bg-secondary">Completed</Badge>
+                        {getStatusBadge(apt.status)}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -294,18 +221,12 @@ const ViewAppointments = () => {
                           <span>{apt.time}</span>
                         </div>
                       </div>
-
-                      {apt.symptoms && apt.symptoms.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {apt.symptoms.map((symptom) => (
-                            <Badge key={symptom} variant="outline">{symptom}</Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      <Button variant="outline" className="w-full">
-                        <FileText className="mr-2 h-4 w-4" />
-                        View Consultation Details
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => navigate('/consult')}
+                      >
+                        Book Another Appointment
                       </Button>
                     </CardContent>
                   </Card>
@@ -319,4 +240,4 @@ const ViewAppointments = () => {
   );
 };
 
-export default ViewAppointments;
+export default Appointments;

@@ -12,9 +12,9 @@ const PatientDashboard = () => {
   const totalConsultations = mockAppointments.length;
 
   const menuItems = [
-    { title: 'Record Symptoms', description: 'Log your current symptoms', icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-primary' },
+    { title: 'My Appointments', description: 'View your scheduled appointments', icon: Calendar, path: '/appointments', color: 'bg-gradient-primary' },
     { title: 'Book Consultation', description: 'Schedule a doctor appointment', icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
-    { title: 'View Profile', description: 'Manage your health profile', icon: FileText, path: '/profile', color: 'bg-gradient-warm' },
+    { title: 'Record Symptoms', description: 'Log your current symptoms', icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
     { title: 'Health Trends', description: 'View your health analytics', icon: TrendingUp, path: '/trends', color: 'bg-primary' },
   ];
 

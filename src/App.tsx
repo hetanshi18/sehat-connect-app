@@ -9,6 +9,7 @@ import PatientDashboard from "./pages/patient/Dashboard";
 import DoctorDashboard from "./pages/doctor/Dashboard";
 import Symptoms from "./pages/patient/Symptoms";
 import Consult from "./pages/patient/Consult";
+import Appointments from "./pages/patient/Appointments";
 import Chat from "./pages/patient/Chat";
 import VideoCall from "./pages/patient/VideoCall";
 import PatientProfile from "./pages/patient/Profile";
@@ -45,6 +46,11 @@ const App = () => {
             <Route path="/consult" element={
               <ProtectedRoute requiredRole="patient">
                 <Consult />
+              </ProtectedRoute>
+            } />
+            <Route path="/appointments" element={
+              <ProtectedRoute requiredRole="patient">
+                <Appointments />
               </ProtectedRoute>
             } />
             <Route path="/consult/chat" element={
