@@ -75,7 +75,8 @@ const Consult = () => {
     }
 
     try {
-      const { error } = await supabase
+      // Create appointment
+      const { error: appointmentError } = await supabase
         .from('appointments')
         .insert({
           patient_id: user.id,
@@ -86,7 +87,18 @@ const Consult = () => {
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (appointmentError) throw appointmentError;
+
+      // Mark slot as booked
+      const { error: slotError } = await supabase
+        .from('time_slots')
+        .update({ 
+          is_booked: true,
+          patient_id: user.id
+        })
+        .eq('id', selectedSlot.id);
+
+      if (slotError) throw slotError;
 
       toast({ title: 'Success', description: 'Booking request sent! Waiting for doctor approval.' });
       navigate('/dashboard');
