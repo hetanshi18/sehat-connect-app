@@ -1,15 +1,80 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock } from 'lucide-react';
+import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock, User, Mail, Phone, Download } from 'lucide-react';
 import { mockAppointments } from '@/lib/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [patientInfo, setPatientInfo] = useState<any>(null);
+  const [symptomReports, setSymptomReports] = useState<any[]>([]);
 
   const upcomingAppointment = mockAppointments.find(apt => apt.status === 'scheduled');
   const totalConsultations = mockAppointments.length;
+
+  useEffect(() => {
+    if (user) {
+      fetchPatientInfo();
+      fetchSymptomReports();
+    }
+  }, [user]);
+
+  const fetchPatientInfo = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('patients_info')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setPatientInfo(data);
+    } catch (error) {
+      console.error('Error fetching patient info:', error);
+    }
+  };
+
+  const fetchSymptomReports = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('patient_id', user.id)
+        .eq('type', 'symptom_report')
+        .order('created_at', { ascending: false });
+      setSymptomReports(data || []);
+    } catch (error) {
+      console.error('Error fetching symptom reports:', error);
+    }
+  };
+
+  const downloadReport = (report: any) => {
+    const reportContent = `
+SYMPTOM ANALYSIS REPORT
+Generated: ${new Date(report.created_at).toLocaleDateString()}
+
+${report.title}
+
+${report.report || ''}
+
+${report.relief_measures ? `Relief Measures:\n${report.relief_measures}` : ''}
+    `;
+    
+    const blob = new Blob([reportContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `symptom-report-${new Date(report.created_at).toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const menuItems = [
     { title: 'My Appointments', description: 'View your scheduled appointments', icon: Calendar, path: '/appointments', color: 'bg-gradient-primary' },
@@ -21,6 +86,48 @@ const PatientDashboard = () => {
   return (
     <DashboardLayout title="Patient Dashboard">
       <div className="space-y-6">
+        {/* Profile Summary */}
+        <Card className="shadow-soft bg-gradient-primary text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              My Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-3">
+              <div className="flex items-center gap-3">
+                <User className="h-5 w-5 opacity-80" />
+                <div>
+                  <p className="text-sm opacity-80">Name</p>
+                  <p className="font-medium">{user?.user_metadata?.name || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 opacity-80" />
+                <div>
+                  <p className="text-sm opacity-80">Email</p>
+                  <p className="font-medium">{user?.email || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 opacity-80" />
+                <div>
+                  <p className="text-sm opacity-80">Phone</p>
+                  <p className="font-medium">{user?.user_metadata?.phone || 'Not provided'}</p>
+                </div>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              className="mt-4 bg-white/20 border-white/30 text-white hover:bg-white/30"
+              onClick={() => navigate('/profile')}
+            >
+              View Full Profile
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="shadow-soft">
@@ -92,6 +199,64 @@ const PatientDashboard = () => {
             })}
           </div>
         </div>
+
+        {/* View Past Reports */}
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle>Past Symptom Reports</CardTitle>
+            <CardDescription>Your previously generated symptom analysis reports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {symptomReports.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No symptom reports yet</p>
+                <Button 
+                  variant="link" 
+                  onClick={() => navigate('/symptoms')}
+                  className="mt-2"
+                >
+                  Record your first symptoms
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {symptomReports.slice(0, 5).map((report) => (
+                  <div key={report.id} className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+                        <FileText className="h-5 w-5 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{report.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => downloadReport(report)}
+                      aria-label="Download report"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {symptomReports.length > 5 && (
+                  <Button 
+                    variant="link" 
+                    onClick={() => navigate('/symptoms')}
+                    className="w-full"
+                  >
+                    View all reports
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card className="shadow-soft">
