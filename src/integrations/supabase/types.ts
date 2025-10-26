@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_notes: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          doctor_id: string
+          follow_up_date: string | null
+          id: string
+          medicines_prescribed: string | null
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          doctor_id: string
+          follow_up_date?: string | null
+          id?: string
+          medicines_prescribed?: string | null
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          doctor_id?: string
+          follow_up_date?: string | null
+          id?: string
+          medicines_prescribed?: string | null
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           created_at: string
@@ -131,6 +167,8 @@ export type Database = {
           file_url: string | null
           id: string
           patient_id: string
+          relief_measures: string | null
+          report: string | null
           title: string
           type: string
         }
@@ -139,6 +177,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           patient_id: string
+          relief_measures?: string | null
+          report?: string | null
           title: string
           type: string
         }
@@ -147,6 +187,8 @@ export type Database = {
           file_url?: string | null
           id?: string
           patient_id?: string
+          relief_measures?: string | null
+          report?: string | null
           title?: string
           type?: string
         }
@@ -275,6 +317,7 @@ export type Database = {
           doctor_id: string
           end_time: string
           id: string
+          is_available: boolean
           is_booked: boolean
           patient_id: string | null
           start_time: string
@@ -285,6 +328,7 @@ export type Database = {
           doctor_id: string
           end_time: string
           id?: string
+          is_available?: boolean
           is_booked?: boolean
           patient_id?: string | null
           start_time: string
@@ -295,6 +339,7 @@ export type Database = {
           doctor_id?: string
           end_time?: string
           id?: string
+          is_available?: boolean
           is_booked?: boolean
           patient_id?: string | null
           start_time?: string

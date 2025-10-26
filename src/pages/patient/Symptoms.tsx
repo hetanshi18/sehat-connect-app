@@ -6,19 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, AlertCircle, FileText, Download } from 'lucide-react';
+import { ArrowLeft, AlertCircle, FileText } from 'lucide-react';
 import { mockSymptoms } from '@/lib/mockData';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
 const Symptoms = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [showReport, setShowReport] = useState(false);
-  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
 
   const handleSymptomToggle = (symptomId: string) => {
     setSelectedSymptoms(prev => 
@@ -28,75 +24,14 @@ const Symptoms = () => {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSymptoms.length === 0) {
       toast({ title: 'Error', description: 'Please select at least one symptom', variant: 'destructive' });
       return;
     }
-    
-    if (!user) {
-      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
-      return;
-    }
-
-    const selectedSymptomNames = mockSymptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name);
-    
-    const reportData = `Reported Symptoms:\n${selectedSymptomNames.join('\n')}\n\n${additionalNotes ? `Additional Notes:\n${additionalNotes}` : ''}`;
-    const reliefMeasures = `Based on your symptoms, we recommend:\n- Rest and stay hydrated\n- Monitor temperature if fever persists\n- Consult a doctor if symptoms worsen\n- Avoid self-medication without professional advice`;
-
-    try {
-      const { data, error } = await supabase
-        .from('health_records')
-        .insert({
-          patient_id: user.id,
-          type: 'symptom_report',
-          title: `Symptom Report - ${new Date().toLocaleDateString()}`,
-          report: reportData,
-          relief_measures: reliefMeasures,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      
-      setCurrentReportId(data.id);
-      setShowReport(true);
-      toast({ title: 'Success', description: 'Symptoms recorded successfully' });
-    } catch (error) {
-      console.error('Error saving symptom report:', error);
-      toast({ title: 'Error', description: 'Failed to save symptom report', variant: 'destructive' });
-    }
-  };
-
-  const downloadCurrentReport = () => {
-    const selectedSymptomNames = mockSymptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name);
-    const reportContent = `
-SYMPTOM ANALYSIS REPORT
-Generated: ${new Date().toLocaleDateString()}
-
-Reported Symptoms:
-${selectedSymptomNames.map(name => `- ${name}`).join('\n')}
-
-${additionalNotes ? `Additional Notes:\n${additionalNotes}\n` : ''}
-
-Preliminary Advice:
-Based on your symptoms, we recommend:
-- Rest and stay hydrated
-- Monitor temperature if fever persists
-- Consult a doctor if symptoms worsen
-- Avoid self-medication without professional advice
-    `;
-    
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `symptom-report-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setShowReport(true);
+    toast({ title: 'Success', description: 'Symptoms recorded successfully' });
   };
 
   if (showReport) {
@@ -154,25 +89,13 @@ Based on your symptoms, we recommend:
               </div>
               
               <div className="flex gap-3">
-                <Button onClick={downloadCurrentReport} variant="outline" className="flex-1">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download Report
-                </Button>
                 <Button onClick={() => navigate('/consult')} className="flex-1">
                   Book Consultation
                 </Button>
+                <Button variant="outline" onClick={() => setShowReport(false)} className="flex-1">
+                  Record New Symptoms
+                </Button>
               </div>
-              <Button 
-                variant="ghost" 
-                onClick={() => {
-                  setShowReport(false);
-                  setSelectedSymptoms([]);
-                  setAdditionalNotes('');
-                }} 
-                className="w-full"
-              >
-                Record New Symptoms
-              </Button>
             </CardContent>
           </Card>
         </div>
