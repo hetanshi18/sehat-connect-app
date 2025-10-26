@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, Clock, User, FileText } from 'lucide-react';
+import { Calendar, Users, Clock, User, FileText, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -56,7 +56,7 @@ const DoctorDashboard = () => {
 
   const menuItems = [
     { title: "Pending Requests", description: `${pendingCount} waiting for approval`, icon: Calendar, path: '/doctor/view-appointments', color: 'bg-gradient-primary', count: pendingCount },
-    { title: 'Patient Records', description: 'View patient histories', icon: Users, path: '/doctor/view-appointments', color: 'bg-gradient-secondary', count: totalPatients },
+    { title: 'Patient History', description: 'View complete patient records', icon: History, path: '/doctor/patient-history', color: 'bg-gradient-secondary', count: totalPatients },
     { title: 'Manage Slots', description: 'Set your availability', icon: Clock, path: '/doctor/manage-slots', color: 'bg-gradient-warm', count: null },
     { title: 'My Profile', description: 'Update professional details', icon: User, path: '/doctor/profile', color: 'bg-primary', count: null },
   ];

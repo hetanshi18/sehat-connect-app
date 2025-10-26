@@ -17,6 +17,7 @@ import Trends from "./pages/patient/Trends";
 import DoctorProfile from "./pages/doctor/Profile";
 import ManageSlots from "./pages/doctor/ManageSlots";
 import ViewAppointments from "./pages/doctor/ViewAppointments";
+import PatientHistory from "./pages/doctor/PatientHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,11 @@ const App = () => {
             <Route path="/doctor/view-appointments" element={
               <ProtectedRoute requiredRole="doctor">
                 <ViewAppointments />
+              </ProtectedRoute>
+            } />
+            <Route path="/doctor/patient-history" element={
+              <ProtectedRoute requiredRole="doctor">
+                <PatientHistory />
               </ProtectedRoute>
             } />
             
