@@ -50,11 +50,17 @@ const ViewAppointments = () => {
   };
 
   const handleApprove = async (appointmentId: string, slotId: string, patientId: string) => {
+    if (!user) {
+      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
+      return;
+    }
+
     try {
       const { error: aptError } = await supabase
         .from('appointments')
         .update({ status: 'confirmed' })
-        .eq('id', appointmentId);
+        .eq('id', appointmentId)
+        .eq('doctor_id', user.id);
 
       if (aptError) throw aptError;
 
@@ -73,12 +79,18 @@ const ViewAppointments = () => {
   };
 
   const handleReject = async (appointmentId: string, slotId: string) => {
+    if (!user) {
+      toast({ title: 'Error', description: 'You must be logged in', variant: 'destructive' });
+      return;
+    }
+
     try {
       // Update appointment status to rejected
       const { error: aptError } = await supabase
         .from('appointments')
         .update({ status: 'rejected' })
-        .eq('id', appointmentId);
+        .eq('id', appointmentId)
+        .eq('doctor_id', user.id);
 
       if (aptError) throw aptError;
 

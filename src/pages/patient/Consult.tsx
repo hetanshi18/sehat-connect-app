@@ -75,6 +75,12 @@ const Consult = () => {
       return;
     }
 
+    // Validate that doctor exists and patient has a profile
+    if (!user.id || !selectedDoctor) {
+      toast({ title: 'Error', description: 'Invalid user or doctor information', variant: 'destructive' });
+      return;
+    }
+
     try {
       // Create appointment with pending status
       const { error: appointmentError } = await supabase

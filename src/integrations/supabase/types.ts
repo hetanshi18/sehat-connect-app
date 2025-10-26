@@ -92,14 +92,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "appointments_doctor_id_fkey"
+            foreignKeyName: "appointments_doctor_fkey"
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_patient_id_fkey"
+            foreignKeyName: "appointments_patient_fkey"
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "profiles"
