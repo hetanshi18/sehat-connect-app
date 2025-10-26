@@ -205,38 +205,38 @@ const Consult = () => {
                         <div className="space-y-4">
                           <div>
                             <h4 className="mb-3 font-semibold">Available Slots</h4>
-                            {timeSlots.length === 0 ? (
+                            {timeSlots.filter(slot => slot.status !== 'booked').length === 0 ? (
                               <p className="text-sm text-muted-foreground py-4 text-center">
                                 No slots available
                               </p>
                             ) : (
                               <div className="grid gap-2 max-h-64 overflow-y-auto">
-                                {timeSlots.map((slot) => {
-                                  const isAvailable = slot.status === 'available';
-                                  const isPendingForOther = slot.status === 'pending' && slot.patient_id !== user?.id;
-                                  const isPendingForMe = slot.status === 'pending' && slot.patient_id === user?.id;
-                                  const isBooked = slot.status === 'booked';
-                                  
-                                  return (
-                                    <Button
-                                      key={slot.id}
-                                      variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
-                                      className={`justify-start w-full ${
-                                        isPendingForOther || isBooked
-                                          ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
-                                          : ''
-                                      } ${isPendingForMe ? 'border-yellow-500 bg-yellow-50' : ''}`}
-                                      onClick={() => isAvailable ? setSelectedSlot(slot) : null}
-                                      disabled={isPendingForOther || isBooked}
-                                    >
-                                      <Calendar className="mr-2 h-4 w-4" />
-                                      {slot.day} • {slot.start_time} - {slot.end_time}
-                                      {isPendingForMe && <Badge className="ml-2 bg-yellow-500">Pending</Badge>}
-                                      {isPendingForOther && <Badge className="ml-2" variant="secondary">Reserved</Badge>}
-                                      {isBooked && <Badge className="ml-2" variant="secondary">Booked</Badge>}
-                                    </Button>
-                                  );
-                                })}
+                                {timeSlots
+                                  .filter(slot => slot.status !== 'booked')
+                                  .map((slot) => {
+                                    const isAvailable = slot.status === 'available';
+                                    const isPendingForOther = slot.status === 'pending' && slot.patient_id !== user?.id;
+                                    const isPendingForMe = slot.status === 'pending' && slot.patient_id === user?.id;
+                                    
+                                    return (
+                                      <Button
+                                        key={slot.id}
+                                        variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
+                                        className={`justify-start w-full ${
+                                          isPendingForOther
+                                            ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
+                                            : ''
+                                        } ${isPendingForMe ? 'border-yellow-500 bg-yellow-50' : ''}`}
+                                        onClick={() => isAvailable ? setSelectedSlot(slot) : null}
+                                        disabled={isPendingForOther}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {slot.day} • {slot.start_time} - {slot.end_time}
+                                        {isPendingForMe && <Badge className="ml-2 bg-yellow-500">Pending</Badge>}
+                                        {isPendingForOther && <Badge className="ml-2" variant="secondary">Reserved</Badge>}
+                                      </Button>
+                                    );
+                                  })}
                               </div>
                             )}
                           </div>
