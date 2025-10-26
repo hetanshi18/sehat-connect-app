@@ -131,7 +131,7 @@ const Consult = () => {
         return;
       }
 
-      // Create appointment with pending status - DO NOT mark slot as booked yet
+      // Create appointment with pending status
       const { error: appointmentError } = await supabase
         .from('appointments')
         .insert({
@@ -144,6 +144,17 @@ const Consult = () => {
         });
 
       if (appointmentError) throw appointmentError;
+
+      // Mark slot as booked so no other patient can request it
+      const { error: slotError } = await supabase
+        .from('time_slots')
+        .update({ 
+          is_booked: true,
+          patient_id: user.id
+        })
+        .eq('id', selectedSlot.id);
+
+      if (slotError) throw slotError;
 
       toast({ title: 'Success', description: 'Booking request sent! Waiting for doctor approval.' });
       navigate('/dashboard');
