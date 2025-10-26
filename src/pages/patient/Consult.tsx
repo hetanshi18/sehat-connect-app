@@ -54,43 +54,16 @@ const Consult = () => {
 
   const fetchTimeSlots = async (doctorId: string) => {
     try {
-      // Fetch all available slots (not is_booked)
+      // Fetch only available slots (is_available = true)
       const { data: slots, error } = await supabase
         .from('time_slots')
         .select('*')
         .eq('doctor_id', doctorId)
-        .eq('is_booked', false)
+        .eq('is_available', true)
         .order('day', { ascending: true });
 
       if (error) throw error;
-
-      // For each slot, check if there's a pending/confirmed appointment
-    const slotsWithStatus = await Promise.all(
-      (slots || []).map(async (slot) => {
-        const { data: existingApt } = await supabase
-          .from('appointments')
-          .select('patient_id, status')
-          .eq('doctor_id', doctorId)
-          .eq('date', slot.day)
-          .eq('time', `${slot.start_time} - ${slot.end_time}`)
-          .in('status', ['pending', 'confirmed'])
-          .maybeSingle();
-
-        return {
-          ...slot,
-          hasConflict: !!existingApt,
-          isOwnPending: existingApt?.patient_id === user?.id && existingApt?.status === 'pending'
-        };
-      })
-    );
-
-    // Filter out slots that have pending/confirmed appointments from other patients
-    // Only show if: no conflict, OR it's the current user's own pending request
-    const availableSlots = slotsWithStatus.filter(slot => 
-      !slot.hasConflict || slot.isOwnPending
-    );
-
-    setTimeSlots(availableSlots);
+      setTimeSlots(slots || []);
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
@@ -103,40 +76,6 @@ const Consult = () => {
     }
 
     try {
-      // Check for existing appointments for this slot
-      const { data: existingAppointments, error: checkError } = await supabase
-        .from('appointments')
-        .select('id, status, patient_id')
-        .eq('doctor_id', selectedDoctor)
-        .eq('date', selectedSlot.day)
-        .eq('time', `${selectedSlot.start_time} - ${selectedSlot.end_time}`)
-        .in('status', ['pending', 'confirmed']);
-
-      if (checkError) throw checkError;
-
-      if (existingAppointments && existingAppointments.length > 0) {
-        const isOwnRequest = existingAppointments.some(apt => apt.patient_id === user.id);
-        
-        if (isOwnRequest) {
-          toast({ 
-            title: 'Request Already Sent', 
-            description: 'You have already sent a booking request for this slot. Please wait for doctor approval.', 
-            variant: 'destructive' 
-          });
-        } else {
-          toast({ 
-            title: 'Slot Unavailable', 
-            description: 'This slot is already booked or awaiting confirmation. Please select another time.', 
-            variant: 'destructive' 
-          });
-        }
-        
-        // Refresh slots to show updated availability
-        fetchTimeSlots(selectedDoctor);
-        setSelectedSlot(null);
-        return;
-      }
-
       // Create appointment with pending status
       const { error: appointmentError } = await supabase
         .from('appointments')
@@ -150,6 +89,14 @@ const Consult = () => {
         });
 
       if (appointmentError) throw appointmentError;
+
+      // Immediately mark slot as unavailable
+      const { error: slotError } = await supabase
+        .from('time_slots')
+        .update({ is_available: false })
+        .eq('id', selectedSlot.id);
+
+      if (slotError) throw slotError;
 
       toast({ title: 'Success', description: 'Booking request sent! Waiting for doctor approval.' });
       navigate('/dashboard');
@@ -230,37 +177,26 @@ const Consult = () => {
                               </p>
                             ) : (
                               <div className="grid gap-2 max-h-64 overflow-y-auto">
-                                {timeSlots.map((slot) => {
-                                  const isOwnPending = slot.isOwnPending;
-                                  
-                                  return (
-                                    <div key={slot.id} className="relative">
-                                      <Button
-                                        variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
-                                        className="justify-start w-full"
-                                        onClick={() => !isOwnPending && setSelectedSlot(slot)}
-                                        disabled={isOwnPending}
-                                      >
-                                        <Calendar className="mr-2 h-4 w-4" />
-                                        {slot.day} • {slot.start_time} - {slot.end_time}
-                                      </Button>
-                                      {isOwnPending && (
-                                        <Badge className="absolute right-2 top-1/2 -translate-y-1/2 bg-yellow-500 text-xs">
-                                          Awaiting Approval
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                                {timeSlots.map((slot) => (
+                                  <Button
+                                    key={slot.id}
+                                    variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
+                                    className="justify-start w-full"
+                                    onClick={() => setSelectedSlot(slot)}
+                                  >
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    {slot.day} • {slot.start_time} - {slot.end_time}
+                                  </Button>
+                                ))}
                               </div>
                             )}
                           </div>
                           <Button 
                             onClick={handleBookSlot} 
                             className="w-full"
-                            disabled={!selectedSlot || selectedSlot.isOwnPending}
+                            disabled={!selectedSlot}
                           >
-                            {selectedSlot?.isOwnPending ? 'Request Already Sent' : 'Send Booking Request'}
+                            Send Booking Request
                           </Button>
                         </div>
                       </DialogContent>
