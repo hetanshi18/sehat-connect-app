@@ -72,6 +72,7 @@ const PatientHistory = () => {
         .from('appointments')
         .select(`
           patient_id,
+          status,
           profiles!appointments_patient_id_fkey (
             id,
             name,
@@ -79,18 +80,19 @@ const PatientHistory = () => {
             phone
           )
         `)
-        .eq('doctor_id', user.id);
+        .eq('doctor_id', user.id)
+        .in('status', ['confirmed', 'completed']);
 
       if (error) throw error;
 
-      // Get unique patients
+      // Get unique patients from confirmed/completed appointments
       const uniquePatients = appointments?.reduce((acc: Patient[], apt: any) => {
-        if (!acc.find(p => p.id === apt.patient_id)) {
+        if (!acc.find(p => p.id === apt.patient_id) && apt.profiles) {
           acc.push({
             id: apt.patient_id,
-            name: apt.profiles?.name || 'Unknown',
-            email: apt.profiles?.email || '',
-            phone: apt.profiles?.phone || ''
+            name: apt.profiles.name || apt.profiles.email.split('@')[0],
+            email: apt.profiles.email,
+            phone: apt.profiles.phone || ''
           });
         }
         return acc;
