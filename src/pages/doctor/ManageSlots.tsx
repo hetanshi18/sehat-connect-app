@@ -57,20 +57,55 @@ const ManageSlots = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('time_slots')
-        .insert({
+      // Parse start and end times to create 1-hour divisions
+      const [startHour, startMinute] = newSlot.startTime.split(':').map(Number);
+      const [endHour, endMinute] = newSlot.endTime.split(':').map(Number);
+      
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+      
+      if (endTotalMinutes <= startTotalMinutes) {
+        toast({ title: 'Error', description: 'End time must be after start time', variant: 'destructive' });
+        return;
+      }
+
+      // Create 1-hour slot divisions
+      const slots = [];
+      let currentMinutes = startTotalMinutes;
+      
+      while (currentMinutes < endTotalMinutes) {
+        const slotStartHour = Math.floor(currentMinutes / 60);
+        const slotStartMinute = currentMinutes % 60;
+        const slotEndMinutes = Math.min(currentMinutes + 60, endTotalMinutes);
+        const slotEndHour = Math.floor(slotEndMinutes / 60);
+        const slotEndMinute = slotEndMinutes % 60;
+        
+        const formatTime = (hour: number, minute: number) => 
+          `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        
+        slots.push({
           doctor_id: user.id,
           day: newSlot.day,
-          start_time: newSlot.startTime,
-          end_time: newSlot.endTime,
-          is_booked: false
+          start_time: formatTime(slotStartHour, slotStartMinute),
+          end_time: formatTime(slotEndHour, slotEndMinute),
+          is_booked: false,
+          status: 'available'
         });
+        
+        currentMinutes += 60;
+      }
+
+      const { error } = await supabase
+        .from('time_slots')
+        .insert(slots);
 
       if (error) throw error;
 
       setNewSlot({ day: '', startTime: '', endTime: '' });
-      toast({ title: 'Success', description: 'Slot added successfully' });
+      toast({ 
+        title: 'Success', 
+        description: `${slots.length} slot(s) added successfully (1-hour divisions)` 
+      });
       fetchSlots();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });

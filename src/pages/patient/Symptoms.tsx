@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, AlertCircle, FileText, Download } from 'lucide-react';
 import { mockSymptoms } from '@/lib/mockData';
 import { toast } from '@/hooks/use-toast';
+import { HealthDocumentUpload } from '@/components/HealthDocumentUpload';
 
 const Symptoms = () => {
   const navigate = useNavigate();
@@ -198,6 +199,10 @@ This is a preliminary report. Please consult with a healthcare professional for 
             </form>
           </CardContent>
         </Card>
+
+        <div className="mt-6">
+          <HealthDocumentUpload />
+        </div>
       </div>
     </DashboardLayout>
   );
