@@ -271,7 +271,7 @@ const Consult = () => {
                                         disabled={isPendingForOther}
                                       >
                                         <Clock className="mr-2 h-4 w-4" />
-                                        {slot.start_time}
+                                        {slot.start_time} - {slot.end_time}
                                         {isPendingForMe && <Badge className="ml-2 bg-yellow-500 text-xs">Pending</Badge>}
                                         {isPendingForOther && <Badge className="ml-2 text-xs" variant="secondary">Reserved</Badge>}
                                       </Button>
