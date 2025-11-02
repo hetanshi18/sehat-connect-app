@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ArrowLeft, Star, Calendar, MessageSquare, Video } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { ArrowLeft, Star, Calendar, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const Consult = () => {
   const navigate = useNavigate();
@@ -18,6 +21,8 @@ const Consult = () => {
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [filteredSlots, setFilteredSlots] = useState<any[]>([]);
 
   useEffect(() => {
     fetchDoctors();
@@ -84,14 +89,33 @@ const Consult = () => {
         .from('time_slots')
         .select('*')
         .eq('doctor_id', doctorId)
-        .order('day', { ascending: true });
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
       setTimeSlots(slots || []);
+      
+      // Filter slots for selected date
+      if (selectedDate) {
+        filterSlotsForDate(slots || [], selectedDate);
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
+
+  const filterSlotsForDate = (slots: any[], date: Date) => {
+    const dayName = format(date, 'EEEE'); // e.g., "Monday", "Tuesday"
+    const filtered = slots.filter(slot => 
+      slot.day === dayName && slot.status !== 'booked'
+    );
+    setFilteredSlots(filtered);
+  };
+
+  useEffect(() => {
+    if (selectedDate && timeSlots.length > 0) {
+      filterSlotsForDate(timeSlots, selectedDate);
+    }
+  }, [selectedDate, timeSlots]);
 
   const handleBookSlot = async () => {
     if (!selectedSlot || !user || !selectedDoctor) {
@@ -113,7 +137,7 @@ const Consult = () => {
           patient_id: user.id,
           doctor_id: selectedDoctor,
           slot_id: selectedSlot.id,
-          date: selectedSlot.day,
+          date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : selectedSlot.day,
           time: `${selectedSlot.start_time} - ${selectedSlot.end_time}`,
           status: 'pending'
         });
@@ -188,6 +212,7 @@ const Consult = () => {
                         onClick={() => {
                           setSelectedDoctor(doctor.user_id);
                           setSelectedSlot(null);
+                          setSelectedDate(new Date());
                           fetchTimeSlots(doctor.user_id);
                         }}
                       >
@@ -196,24 +221,39 @@ const Consult = () => {
                       </Button>
                     </DialogTrigger>
                     {selectedDoctor === doctor.user_id && (
-                      <DialogContent className="max-w-md">
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>{doctor.profiles?.name || 'Doctor'}</DialogTitle>
                           <DialogDescription>{doctor.specialty}</DialogDescription>
                         </DialogHeader>
                         
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           <div>
-                            <h4 className="mb-3 font-semibold">Available Slots</h4>
-                            {timeSlots.filter(slot => slot.status !== 'booked').length === 0 ? (
-                              <p className="text-sm text-muted-foreground py-4 text-center">
-                                No slots available
-                              </p>
-                            ) : (
-                              <div className="grid gap-2 max-h-64 overflow-y-auto">
-                                {timeSlots
-                                  .filter(slot => slot.status !== 'booked')
-                                  .map((slot) => {
+                            <h4 className="mb-3 font-semibold">Select Date</h4>
+                            <div className="flex justify-center">
+                              <CalendarComponent
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={setSelectedDate}
+                                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                className={cn("rounded-md border pointer-events-auto")}
+                              />
+                            </div>
+                          </div>
+
+                          {selectedDate && (
+                            <div>
+                              <h4 className="mb-3 font-semibold flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                Available Time Slots for {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+                              </h4>
+                              {filteredSlots.length === 0 ? (
+                                <p className="text-sm text-muted-foreground py-6 text-center border rounded-md bg-muted/30">
+                                  No slots available for this date
+                                </p>
+                              ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                                  {filteredSlots.map((slot) => {
                                     const isAvailable = slot.status === 'available';
                                     const isPendingForOther = slot.status === 'pending' && slot.patient_id !== user?.id;
                                     const isPendingForMe = slot.status === 'pending' && slot.patient_id === user?.id;
@@ -222,7 +262,7 @@ const Consult = () => {
                                       <Button
                                         key={slot.id}
                                         variant={selectedSlot?.id === slot.id ? 'default' : 'outline'}
-                                        className={`justify-start w-full ${
+                                        className={`justify-center w-full ${
                                           isPendingForOther
                                             ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
                                             : ''
@@ -230,20 +270,22 @@ const Consult = () => {
                                         onClick={() => isAvailable ? setSelectedSlot(slot) : null}
                                         disabled={isPendingForOther}
                                       >
-                                        <Calendar className="mr-2 h-4 w-4" />
-                                        {slot.day} • {slot.start_time} - {slot.end_time}
-                                        {isPendingForMe && <Badge className="ml-2 bg-yellow-500">Pending</Badge>}
-                                        {isPendingForOther && <Badge className="ml-2" variant="secondary">Reserved</Badge>}
+                                        <Clock className="mr-2 h-4 w-4" />
+                                        {slot.start_time}
+                                        {isPendingForMe && <Badge className="ml-2 bg-yellow-500 text-xs">Pending</Badge>}
+                                        {isPendingForOther && <Badge className="ml-2 text-xs" variant="secondary">Reserved</Badge>}
                                       </Button>
                                     );
                                   })}
-                              </div>
-                            )}
-                          </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
                           <Button 
                             onClick={handleBookSlot} 
                             className="w-full"
-                            disabled={!selectedSlot}
+                            disabled={!selectedSlot || !selectedDate}
                           >
                             Send Booking Request
                           </Button>
