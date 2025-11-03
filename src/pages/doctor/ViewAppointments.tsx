@@ -56,6 +56,9 @@ const ViewAppointments = () => {
     }
 
     try {
+      // Get appointment details to check timing
+      const appointment = appointments.find(apt => apt.id === appointmentId);
+      
       const { error: aptError } = await supabase
         .from('appointments')
         .update({ status: 'confirmed' })
@@ -75,6 +78,20 @@ const ViewAppointments = () => {
         .eq('id', slotId);
 
       if (slotError) throw slotError;
+
+      // Check if appointment is within 6 hours and send immediate reminder
+      if (appointment) {
+        const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+        const now = new Date();
+        const hoursDiff = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursDiff <= 6 && hoursDiff > 0) {
+          // Send immediate reminder
+          supabase.functions.invoke('send-appointment-reminders').catch(err => {
+            console.error('Failed to send immediate reminder:', err);
+          });
+        }
+      }
 
       toast({ title: 'Success', description: 'Appointment confirmed successfully!' });
       fetchAppointments();
