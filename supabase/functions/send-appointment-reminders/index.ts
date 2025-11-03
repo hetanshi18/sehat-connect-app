@@ -63,8 +63,8 @@ Deno.serve(async (req) => {
       .from('appointments')
       .select(`
         *,
-        patient:profiles!appointments_patient_id_fkey(name, phone),
-        doctor:profiles!appointments_doctor_id_fkey(name, phone)
+        patient:profiles!patient_id(name, phone),
+        doctor:profiles!doctor_id(name, phone)
       `)
       .eq('status', 'confirmed')
       .gte('date', sixHoursLater.toISOString().split('T')[0])
