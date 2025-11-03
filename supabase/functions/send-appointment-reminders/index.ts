@@ -44,7 +44,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting appointment reminder check...');
+    console.log('=== STARTING APPOINTMENT REMINDER CHECK ===');
+    console.log('Current time:', new Date().toISOString());
+    console.log('Twilio config:', {
+      accountSid: TWILIO_ACCOUNT_SID ? 'SET' : 'NOT SET',
+      authToken: TWILIO_AUTH_TOKEN ? 'SET' : 'NOT SET',
+      phoneNumber: TWILIO_PHONE_NUMBER,
+      recipientPhone: RECIPIENT_PHONE
+    });
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -56,7 +63,15 @@ Deno.serve(async (req) => {
     const sixHoursLater = new Date(now.getTime() + 6 * 60 * 60 * 1000);
     const sevenHoursLater = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-    console.log('Checking appointments between:', sixHoursLater, 'and', sevenHoursLater);
+    console.log('Time window:', {
+      now: now.toISOString(),
+      sixHoursLater: sixHoursLater.toISOString(),
+      sevenHoursLater: sevenHoursLater.toISOString(),
+      dateFilter: {
+        gte: sixHoursLater.toISOString().split('T')[0],
+        lte: sevenHoursLater.toISOString().split('T')[0]
+      }
+    });
 
     // Fetch appointments that are 6-7 hours from now and confirmed
     const { data: appointments, error } = await supabase
@@ -75,51 +90,92 @@ Deno.serve(async (req) => {
       throw error;
     }
 
-    console.log(`Found ${appointments?.length || 0} appointments`);
+    console.log(`Found ${appointments?.length || 0} confirmed appointments`);
+    console.log('Appointments data:', JSON.stringify(appointments, null, 2));
 
     const remindersSent = [];
 
     for (const appointment of appointments || []) {
+      console.log(`\n--- Processing appointment ${appointment.id} ---`);
+      console.log('Appointment details:', {
+        id: appointment.id,
+        date: appointment.date,
+        time: appointment.time,
+        patient: appointment.patient,
+        doctor: appointment.doctor
+      });
+
       // Parse appointment date and time
-      const appointmentDateTime = new Date(`${appointment.date}T${appointment.time}`);
+      const appointmentDateTime = new Date(`${appointment.date}T${appointment.time.split(' - ')[0]}`);
       const timeDiff = appointmentDateTime.getTime() - now.getTime();
       const hoursDiff = timeDiff / (1000 * 60 * 60);
 
+      console.log('Time calculation:', {
+        appointmentDateTime: appointmentDateTime.toISOString(),
+        timeDiffMs: timeDiff,
+        hoursDiff: hoursDiff.toFixed(2),
+        isInWindow: hoursDiff >= 6 && hoursDiff <= 7
+      });
+
       // Check if appointment is between 6 and 7 hours from now
       if (hoursDiff >= 6 && hoursDiff <= 7) {
-        console.log(`Sending reminder for appointment ${appointment.id}`);
+        console.log(`✓ Appointment is within reminder window, sending SMS...`);
 
         // Send SMS to patient (hardcoded number)
         const patientMessage = `Reminder: You have an appointment with Dr. ${appointment.doctor.name} on ${appointment.date} at ${appointment.time}. Please be on time!`;
+        console.log('Patient message:', patientMessage);
         
         try {
-          await sendSMS(RECIPIENT_PHONE, patientMessage);
-          console.log('Patient reminder sent');
+          const smsResult = await sendSMS(RECIPIENT_PHONE, patientMessage);
+          console.log('✓ Patient reminder sent successfully:', smsResult);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'patient',
             message: patientMessage,
+            status: 'success'
           });
         } catch (error) {
-          console.error('Error sending patient SMS:', error);
+          console.error('✗ Error sending patient SMS:', error);
+          remindersSent.push({
+            appointmentId: appointment.id,
+            type: 'patient',
+            message: patientMessage,
+            status: 'failed',
+            error: error instanceof Error ? error.message : String(error)
+          });
         }
 
         // Send SMS to doctor (hardcoded number)
         const doctorMessage = `Reminder: You have an appointment with ${appointment.patient.name} on ${appointment.date} at ${appointment.time}.`;
+        console.log('Doctor message:', doctorMessage);
         
         try {
-          await sendSMS(RECIPIENT_PHONE, doctorMessage);
-          console.log('Doctor reminder sent');
+          const smsResult = await sendSMS(RECIPIENT_PHONE, doctorMessage);
+          console.log('✓ Doctor reminder sent successfully:', smsResult);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'doctor',
             message: doctorMessage,
+            status: 'success'
           });
         } catch (error) {
-          console.error('Error sending doctor SMS:', error);
+          console.error('✗ Error sending doctor SMS:', error);
+          remindersSent.push({
+            appointmentId: appointment.id,
+            type: 'doctor',
+            message: doctorMessage,
+            status: 'failed',
+            error: error instanceof Error ? error.message : String(error)
+          });
         }
+      } else {
+        console.log(`✗ Appointment not in window (${hoursDiff.toFixed(2)} hours away)`);
       }
     }
+
+    console.log('\n=== REMINDER CHECK COMPLETE ===');
+    console.log('Total reminders sent:', remindersSent.length);
+    console.log('Summary:', JSON.stringify(remindersSent, null, 2));
 
     return new Response(
       JSON.stringify({
