@@ -1,47 +1,106 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Mic, MicOff, Video, VideoOff, PhoneOff, FileText, ClipboardList, Pill } from 'lucide-react';
-import { mockDoctors } from '@/lib/mockData';
+import { ArrowLeft, Mic, MicOff, Video, VideoOff, PhoneOff, FileText, ClipboardList, Pill, Loader2 } from 'lucide-react';
+import { useTwilioVideo } from '@/hooks/useTwilioVideo';
+import { useAuth } from '@/hooks/useAuth';
 
 const VideoCall = () => {
   const navigate = useNavigate();
-  const { doctorId } = useParams();
-  const doctor = mockDoctors.find(d => d.id === doctorId);
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const appointmentId = searchParams.get('appointmentId') || '';
+  const patientName = searchParams.get('patientName') || 'Patient';
+  const doctorName = searchParams.get('doctorName') || 'Doctor';
+  const userRole = searchParams.get('role') as 'doctor' | 'patient' || 'doctor';
   
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
+  const displayName = userRole === 'doctor' ? patientName : doctorName;
+  const userName = user?.email?.split('@')[0] || 'User';
+
+  const {
+    connectToRoom,
+    disconnectFromRoom,
+    toggleMute,
+    toggleVideo,
+    isConnecting,
+    isConnected,
+    isMuted,
+    isVideoOff,
+    participants,
+    localVideoRef,
+    remoteVideoRef,
+  } = useTwilioVideo({ appointmentId, userName, userRole });
+
+  useEffect(() => {
+    if (appointmentId) {
+      connectToRoom();
+    }
+  }, [appointmentId]);
+
+  const handleEndCall = () => {
+    disconnectFromRoom();
+    navigate(userRole === 'doctor' ? '/doctor/view-appointments' : '/appointments');
+  };
 
   return (
-    <DashboardLayout title={`Video Call with ${doctor?.name || 'Doctor'}`}>
+    <DashboardLayout title={`Video Call with ${displayName}`}>
       <div className="max-w-7xl">
-        <Button variant="ghost" onClick={() => navigate('/consult')} className="mb-4">
+        <Button 
+          variant="ghost" 
+          onClick={handleEndCall} 
+          className="mb-4"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Consultations
+          Back
         </Button>
+
+        {isConnecting && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-3 text-lg">Connecting to video call...</span>
+          </div>
+        )}
 
         <div className="grid gap-4 lg:grid-cols-3">
           {/* Video Area */}
           <div className="lg:col-span-2 space-y-4">
             {/* Remote Video */}
             <Card className="shadow-medium overflow-hidden">
-              <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-primary text-white text-4xl font-bold mb-4">
-                    {doctor?.name.split(' ')[1][0]}
-                  </div>
-                  <p className="text-lg font-semibold">{doctor?.name}</p>
-                  <p className="text-sm text-muted-foreground">{doctor?.specialty}</p>
+              <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-secondary/20">
+                <div 
+                  ref={remoteVideoRef} 
+                  className="h-full w-full [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
+                >
+                  {!isConnected || participants.length === 0 ? (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-primary text-white text-4xl font-bold mb-4">
+                          {displayName[0]}
+                        </div>
+                        <p className="text-lg font-semibold">{displayName}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {participants.length === 0 ? 'Waiting to join...' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
                 
                 {/* Local Video (Picture-in-Picture) */}
                 <Card className="absolute bottom-4 right-4 w-48 aspect-video shadow-medium overflow-hidden">
-                  <div className="h-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
-                    <p className="text-sm font-medium">You</p>
+                  <div 
+                    ref={localVideoRef}
+                    className="h-full w-full bg-gradient-to-br from-accent/20 to-primary/20 [&>video]:w-full [&>video]:h-full [&>video]:object-cover"
+                  >
+                    {!isConnected && (
+                      <div className="h-full flex items-center justify-center">
+                        <p className="text-sm font-medium">You</p>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </div>
@@ -53,7 +112,8 @@ const VideoCall = () => {
                 <Button
                   size="lg"
                   variant={isMuted ? 'destructive' : 'secondary'}
-                  onClick={() => setIsMuted(!isMuted)}
+                  onClick={toggleMute}
+                  disabled={!isConnected}
                   aria-label={isMuted ? 'Unmute' : 'Mute'}
                 >
                   {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
@@ -61,7 +121,8 @@ const VideoCall = () => {
                 <Button
                   size="lg"
                   variant={isVideoOff ? 'destructive' : 'secondary'}
-                  onClick={() => setIsVideoOff(!isVideoOff)}
+                  onClick={toggleVideo}
+                  disabled={!isConnected}
                   aria-label={isVideoOff ? 'Turn on camera' : 'Turn off camera'}
                 >
                   {isVideoOff ? <VideoOff className="h-5 w-5" /> : <Video className="h-5 w-5" />}
@@ -69,7 +130,7 @@ const VideoCall = () => {
                 <Button
                   size="lg"
                   variant="destructive"
-                  onClick={() => navigate('/consult')}
+                  onClick={handleEndCall}
                   aria-label="End call"
                 >
                   <PhoneOff className="h-5 w-5" />

@@ -294,7 +294,12 @@ const ViewAppointments = () => {
                       )}
 
                       <div className="flex gap-2 pt-2">
-                        <Button className="flex-1">Start Consultation</Button>
+                        <Button 
+                          className="flex-1"
+                          onClick={() => navigate(`/video-call?appointmentId=${apt.id}&patientName=${apt.profiles?.name || 'Patient'}&doctorName=${user?.email?.split('@')[0] || 'Doctor'}&role=doctor`)}
+                        >
+                          Start Consultation
+                        </Button>
                         <Button variant="outline" className="flex-1">View Patient History</Button>
                       </div>
                     </CardContent>
