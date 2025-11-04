@@ -250,17 +250,17 @@ if current:
 
 print("Detected symptoms:", merged_results)
 
-#!zip -r biobert_ner_model.zip biobert_ner_model/
+# #!zip -r biobert_ner_model.zip biobert_ner_model/
 
-from google.colab import drive
-drive.mount('/content/drive')
+# from google.colab import drive
+# drive.mount('/content/drive')
 
-save_path = "/content/drive/MyDrive/Mini project/biobert_ner_model"
+# save_path = "/content/drive/MyDrive/Mini project/biobert_ner_model"
 
-model.save_pretrained(save_path)
-tokenizer.save_pretrained(save_path)
+# model.save_pretrained(save_path)
+# tokenizer.save_pretrained(save_path)
 
-from transformers import TrainingArguments
-print(TrainingArguments.__module__)
-print(TrainingArguments.__file__ if hasattr(TrainingArguments, "__file__") else "No file attribute")
+# from transformers import TrainingArguments
+# print(TrainingArguments.__module__)
+# print(TrainingArguments.__file__ if hasattr(TrainingArguments, "__file__") else "No file attribute")
 

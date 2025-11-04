@@ -68,21 +68,21 @@ if __name__ == "__main__":
 import joblib
 import os
 
-# Your specified directory
-MODEL_DIR = "/content/drive/MyDrive/Mini project/meds_model"
-os.makedirs(MODEL_DIR, exist_ok=True)
+# # Your specified directory
+# MODEL_DIR = "/content/drive/MyDrive/Mini project/meds_model"
+# os.makedirs(MODEL_DIR, exist_ok=True)
 
-# Save model, vectorizer, and dataset
-joblib.dump(model, os.path.join(MODEL_DIR, "knn_model.pkl"))
-joblib.dump(vectorizer, os.path.join(MODEL_DIR, "vectorizer.pkl"))
-data.to_csv(os.path.join(MODEL_DIR, "disease_medicine.csv"), index=False)
+# # Save model, vectorizer, and dataset
+# joblib.dump(model, os.path.join(MODEL_DIR, "knn_model.pkl"))
+# joblib.dump(vectorizer, os.path.join(MODEL_DIR, "vectorizer.pkl"))
+# data.to_csv(os.path.join(MODEL_DIR, "disease_medicine.csv"), index=False)
 
-print(f"✅ Model and data saved successfully to {MODEL_DIR}")
+# print(f"✅ Model and data saved successfully to {MODEL_DIR}")
 
-!ls "/content/drive/MyDrive/Mini project/meds_model"
+# !ls "/content/drive/MyDrive/Mini project/meds_model"
 
-import os
+# import os
 
-folder = "/content/drive/MyDrive/Mini project/meds_model"
-print(os.listdir(folder))
+# folder = "/content/drive/MyDrive/Mini project/meds_model"
+# print(os.listdir(folder))
 

@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1sCf1koG5JI4aNTZWVXyTPaFrMRM7EulJ
 """
 
-!pip install -q scikit-learn joblib pandas numpy xgboost rapidfuzz
+# !pip install -q scikit-learn joblib pandas numpy xgboost rapidfuzz
 
 import os, json, re, string, warnings
 from collections import Counter, defaultdict
@@ -389,17 +389,17 @@ def predict_disease(symptoms, top_k=3):
 demo = ["sneezing", "coughing", "watery eyes","runny nose" ]
 print("\nDemo:", predict_disease(demo, top_k=3))
 
-from google.colab import drive
-drive.mount('/content/drive')
+# from google.colab import drive
+# drive.mount('/content/drive')
 
-import os
-import joblib
+# import os
+# import joblib
 
-MODEL_DIR2 = "/content/drive/MyDrive/Mini project/disease_model_artifacts"
-os.makedirs(MODEL_DIR2, exist_ok=True)
+# MODEL_DIR2 = "/content/drive/MyDrive/Mini project/disease_model_artifacts"
+# os.makedirs(MODEL_DIR2, exist_ok=True)
 
-# Save trained model + encoders
-joblib.dump(winner, os.path.join(MODEL_DIR2, "model.pkl"))
-joblib.dump(le, os.path.join(MODEL_DIR2, "label_encoder.pkl"))
-joblib.dump(mlb, os.path.join(MODEL_DIR2, "symptom_binarizer.pkl"))
+# # Save trained model + encoders
+# joblib.dump(winner, os.path.join(MODEL_DIR2, "model.pkl"))
+# joblib.dump(le, os.path.join(MODEL_DIR2, "label_encoder.pkl"))
+# joblib.dump(mlb, os.path.join(MODEL_DIR2, "symptom_binarizer.pkl"))
 
