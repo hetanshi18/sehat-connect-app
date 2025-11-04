@@ -10,8 +10,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-async function sendSMS(to: string, message: string) {
+async function sendWhatsApp(to: string, message: string) {
   const auth = btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`);
+  
+  // Format phone numbers for WhatsApp (add whatsapp: prefix)
+  const formattedTo = to.startsWith('whatsapp:') ? to : `whatsapp:${to}`;
+  const formattedFrom = TWILIO_PHONE_NUMBER!.startsWith('whatsapp:') 
+    ? TWILIO_PHONE_NUMBER! 
+    : `whatsapp:${TWILIO_PHONE_NUMBER!}`;
+  
+  console.log('Sending WhatsApp message:', {
+    to: formattedTo,
+    from: formattedFrom,
+    messagePreview: message.substring(0, 50) + '...'
+  });
   
   const response = await fetch(
     `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
@@ -22,8 +34,8 @@ async function sendSMS(to: string, message: string) {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
-        To: to,
-        From: TWILIO_PHONE_NUMBER!,
+        To: formattedTo,
+        From: formattedFrom,
         Body: message,
       }),
     }
@@ -31,11 +43,13 @@ async function sendSMS(to: string, message: string) {
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('Twilio API error:', error);
-    throw new Error(`Failed to send SMS: ${error}`);
+    console.error('Twilio WhatsApp API error:', error);
+    throw new Error(`Failed to send WhatsApp message: ${error}`);
   }
 
-  return await response.json();
+  const result = await response.json();
+  console.log('WhatsApp message sent successfully:', result.sid);
+  return result;
 }
 
 Deno.serve(async (req) => {
@@ -58,32 +72,61 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get current time and time 6 hours from now
-    const now = new Date();
-    const sixHoursLater = new Date(now.getTime() + 6 * 60 * 60 * 1000);
-    const sevenHoursLater = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    // Check if specific appointment ID was provided (for immediate reminders)
+    const body = req.method === 'POST' ? await req.json() : {};
+    const specificAppointmentId = body.appointmentId;
 
-    console.log('Time window:', {
-      now: now.toISOString(),
-      sixHoursLater: sixHoursLater.toISOString(),
-      sevenHoursLater: sevenHoursLater.toISOString(),
-      dateFilter: {
-        gte: sixHoursLater.toISOString().split('T')[0],
-        lte: sevenHoursLater.toISOString().split('T')[0]
-      }
+    console.log('Request details:', {
+      method: req.method,
+      specificAppointmentId: specificAppointmentId || 'none - checking all appointments'
     });
 
-    // Fetch appointments that are 6-7 hours from now and confirmed
-    const { data: appointments, error } = await supabase
-      .from('appointments')
-      .select(`
-        *,
-        patient:profiles!appointments_patient_fkey(name, phone),
-        doctor:profiles!appointments_doctor_fkey(name, phone)
-      `)
-      .eq('status', 'confirmed')
-      .gte('date', sixHoursLater.toISOString().split('T')[0])
-      .lte('date', sevenHoursLater.toISOString().split('T')[0]);
+    const now = new Date();
+    let appointments;
+    let error;
+
+    if (specificAppointmentId) {
+      // Fetch specific appointment for immediate reminder
+      console.log('Fetching specific appointment:', specificAppointmentId);
+      const result = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patient:profiles!appointments_patient_fkey(name, phone),
+          doctor:profiles!appointments_doctor_fkey(name, phone)
+        `)
+        .eq('id', specificAppointmentId)
+        .eq('status', 'confirmed')
+        .single();
+      
+      appointments = result.data ? [result.data] : [];
+      error = result.error;
+    } else {
+      // Get current time and time 6 hours from now for scheduled check
+      const sixHoursLater = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+      const sevenHoursLater = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+
+      console.log('Time window for scheduled check:', {
+        now: now.toISOString(),
+        sixHoursLater: sixHoursLater.toISOString(),
+        sevenHoursLater: sevenHoursLater.toISOString()
+      });
+
+      // Fetch appointments that are 6-7 hours from now and confirmed
+      const result = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          patient:profiles!appointments_patient_fkey(name, phone),
+          doctor:profiles!appointments_doctor_fkey(name, phone)
+        `)
+        .eq('status', 'confirmed')
+        .gte('date', sixHoursLater.toISOString().split('T')[0])
+        .lte('date', sevenHoursLater.toISOString().split('T')[0]);
+      
+      appointments = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('Error fetching appointments:', error);
@@ -114,20 +157,25 @@ Deno.serve(async (req) => {
         appointmentDateTime: appointmentDateTime.toISOString(),
         timeDiffMs: timeDiff,
         hoursDiff: hoursDiff.toFixed(2),
-        isInWindow: hoursDiff >= 6 && hoursDiff <= 7
+        specificAppointmentId: specificAppointmentId || 'none'
       });
 
-      // Check if appointment is between 6 and 7 hours from now
-      if (hoursDiff >= 6 && hoursDiff <= 7) {
-        console.log(`✓ Appointment is within reminder window, sending SMS...`);
+      // For immediate reminders (specificAppointmentId), send if within 6 hours
+      // For scheduled checks, send if 6-7 hours away
+      const shouldSend = specificAppointmentId 
+        ? (hoursDiff <= 6 && hoursDiff > 0) 
+        : (hoursDiff >= 6 && hoursDiff <= 7);
 
-        // Send SMS to patient (hardcoded number)
-        const patientMessage = `Reminder: You have an appointment with Dr. ${appointment.doctor.name} on ${appointment.date} at ${appointment.time}. Please be on time!`;
+      if (shouldSend) {
+        console.log(`✓ Appointment is within reminder window, sending WhatsApp message...`);
+
+        // Send WhatsApp to patient (hardcoded number)
+        const patientMessage = `🏥 *Appointment Reminder*\n\nYou have an appointment with Dr. ${appointment.doctor.name}\n📅 Date: ${appointment.date}\n⏰ Time: ${appointment.time}\n\nPlease be on time!`;
         console.log('Patient message:', patientMessage);
         
         try {
-          const smsResult = await sendSMS(RECIPIENT_PHONE, patientMessage);
-          console.log('✓ Patient reminder sent successfully:', smsResult);
+          const whatsappResult = await sendWhatsApp(RECIPIENT_PHONE, patientMessage);
+          console.log('✓ Patient WhatsApp reminder sent successfully:', whatsappResult);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'patient',
@@ -135,7 +183,7 @@ Deno.serve(async (req) => {
             status: 'success'
           });
         } catch (error) {
-          console.error('✗ Error sending patient SMS:', error);
+          console.error('✗ Error sending patient WhatsApp:', error);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'patient',
@@ -145,13 +193,13 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Send SMS to doctor (hardcoded number)
-        const doctorMessage = `Reminder: You have an appointment with ${appointment.patient.name} on ${appointment.date} at ${appointment.time}.`;
+        // Send WhatsApp to doctor (hardcoded number)
+        const doctorMessage = `🏥 *Appointment Reminder*\n\nYou have an appointment with ${appointment.patient.name}\n📅 Date: ${appointment.date}\n⏰ Time: ${appointment.time}`;
         console.log('Doctor message:', doctorMessage);
         
         try {
-          const smsResult = await sendSMS(RECIPIENT_PHONE, doctorMessage);
-          console.log('✓ Doctor reminder sent successfully:', smsResult);
+          const whatsappResult = await sendWhatsApp(RECIPIENT_PHONE, doctorMessage);
+          console.log('✓ Doctor WhatsApp reminder sent successfully:', whatsappResult);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'doctor',
@@ -159,7 +207,7 @@ Deno.serve(async (req) => {
             status: 'success'
           });
         } catch (error) {
-          console.error('✗ Error sending doctor SMS:', error);
+          console.error('✗ Error sending doctor WhatsApp:', error);
           remindersSent.push({
             appointmentId: appointment.id,
             type: 'doctor',
