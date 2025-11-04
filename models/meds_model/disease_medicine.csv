@@ -1,0 +1,57 @@
+Disease,Med1,Med2,Med3,Med4,Med5,Med6,All_Meds
+flu,Paracetamol,Oseltamivir,Dextromethorphan,Ambroxol,Vicks VapoRub,Cetirizine,Paracetamol Oseltamivir Dextromethorphan Ambroxol Vicks VapoRub Cetirizine
+common cold,Paracetamol,Cetirizine,Levocetirizine,Phenylephrine,Steam inhalation,Saline nasal drops,Paracetamol Cetirizine Levocetirizine Phenylephrine Steam inhalation Saline nasal drops
+migraine,Ibuprofen,Naproxen,Sumatriptan,Rizatriptan,Metoclopramide,Paracetamol,Ibuprofen Naproxen Sumatriptan Rizatriptan Metoclopramide Paracetamol
+asthma,Salbutamol inhaler,Budesonide inhaler,Montelukast,Ipratropium,Theophylline,Cetirizine,Salbutamol inhaler Budesonide inhaler Montelukast Ipratropium Theophylline Cetirizine
+pneumonia,Amoxicillin-clavulanate,Azithromycin,Levofloxacin,Paracetamol,Oxygen therapy,Steam inhalation,Amoxicillin-clavulanate Azithromycin Levofloxacin Paracetamol Oxygen therapy Steam inhalation
+covid-19,Paracetamol,Ivermectin,Favipiravir,Vitamin C,Vitamin D,Zinc,Paracetamol Ivermectin Favipiravir Vitamin C Vitamin D Zinc
+diabetes,Metformin,Glimepiride,Insulin,DPP-4 inhibitor,SGLT2 inhibitor,Pioglitazone,Metformin Glimepiride Insulin DPP-4 inhibitor SGLT2 inhibitor Pioglitazone
+hypertension,Amlodipine,Telmisartan,Losartan,HCTZ,Atenolol,Carvedilol,Amlodipine Telmisartan Losartan HCTZ Atenolol Carvedilol
+malaria,Artemisinin combo,Chloroquine,Primaquine,Paracetamol,ORS,Vitamin C,Artemisinin combo Chloroquine Primaquine Paracetamol ORS Vitamin C
+dengue,Paracetamol,ORS,Zinc,Vitamin C,Hydration therapy,Electrolyte solution,Paracetamol ORS Zinc Vitamin C Hydration therapy Electrolyte solution
+chickenpox,Paracetamol,Calamine lotion,Acyclovir,Cetirizine,Oatmeal bath,Hydration therapy,Paracetamol Calamine lotion Acyclovir Cetirizine Oatmeal bath Hydration therapy
+tuberculosis,Isoniazid,Rifampicin,Pyrazinamide,Ethambutol,Pyridoxine,Vitamin B complex,Isoniazid Rifampicin Pyrazinamide Ethambutol Pyridoxine Vitamin B complex
+bronchitis,Ambroxol,Salbutamol inhaler,Dextromethorphan,Steam inhalation,Paracetamol,Ipratropium,Ambroxol Salbutamol inhaler Dextromethorphan Steam inhalation Paracetamol Ipratropium
+sinusitis,Amoxicillin,Amoxicillin-clavulanate,Saline nasal drops,Fluticasone spray,Paracetamol,Steam inhalation,Amoxicillin Amoxicillin-clavulanate Saline nasal drops Fluticasone spray Paracetamol Steam inhalation
+allergic rhinitis,Cetirizine,Levocetirizine,Loratadine,Fluticasone spray,Saline nasal drops,Montelukast,Cetirizine Levocetirizine Loratadine Fluticasone spray Saline nasal drops Montelukast
+eczema,Hydrocortisone cream,Tacrolimus ointment,Moisturizer,Antihistamine,Vitamin E cream,Emollient bath,Hydrocortisone cream Tacrolimus ointment Moisturizer Antihistamine Vitamin E cream Emollient bath
+psoriasis,Coal tar ointment,Salicylic acid cream,Topical corticosteroid,Methotrexate,Moisturizer,Calcipotriol ointment,Coal tar ointment Salicylic acid cream Topical corticosteroid Methotrexate Moisturizer Calcipotriol ointment
+conjunctivitis,Chloramphenicol drops,Tobramycin drops,Artificial tears,Antihistamine drops,Lubricant gel,Cold compress,Chloramphenicol drops Tobramycin drops Artificial tears Antihistamine drops Lubricant gel Cold compress
+otitis media,Amoxicillin,Ciprofloxacin drops,Paracetamol,Ibuprofen,Ear drops (antiseptic),Steam inhalation,Amoxicillin Ciprofloxacin drops Paracetamol Ibuprofen Ear drops (antiseptic) Steam inhalation
+gastroenteritis,ORS,Zinc,Loperamide,Paracetamol,Probiotics,Hydration therapy,ORS Zinc Loperamide Paracetamol Probiotics Hydration therapy
+food poisoning,ORS,Zinc,Ciprofloxacin,Ofloxacin,Probiotics,Paracetamol,ORS Zinc Ciprofloxacin Ofloxacin Probiotics Paracetamol
+peptic ulcer,Omeprazole,Pantoprazole,Antacids,Ranitidine,Sucralfate,Probiotics,Omeprazole Pantoprazole Antacids Ranitidine Sucralfate Probiotics
+gerd,Omeprazole,Pantoprazole,Antacids,Ranitidine,Sucralfate,Domperidone,Omeprazole Pantoprazole Antacids Ranitidine Sucralfate Domperidone
+appendicitis,Paracetamol,Ibuprofen,Antibiotic therapy,Metronidazole,Amoxicillin,Supportive hydration,Paracetamol Ibuprofen Antibiotic therapy Metronidazole Amoxicillin Supportive hydration
+gallstones,Ursodeoxycholic acid,Paracetamol,Ibuprofen,Antispasmodics,Hydration therapy,Fiber supplements,Ursodeoxycholic acid Paracetamol Ibuprofen Antispasmodics Hydration therapy Fiber supplements
+kidney stones,Paracetamol,Ibuprofen,Tamsulosin,Potassium citrate,Hydration therapy,Alpha-blockers,Paracetamol Ibuprofen Tamsulosin Potassium citrate Hydration therapy Alpha-blockers
+uti,Ciprofloxacin,Ofloxacin,Nitrofurantoin,Paracetamol,Hydration therapy,D-mannose,Ciprofloxacin Ofloxacin Nitrofurantoin Paracetamol Hydration therapy D-mannose
+hepatitis a,Paracetamol,Vitamin C,Vitamin B complex,Hydration therapy,Ursodeoxycholic acid,Zinc,Paracetamol Vitamin C Vitamin B complex Hydration therapy Ursodeoxycholic acid Zinc
+hepatitis b,Tenofovir,Entecavir,Lamivudine,Paracetamol,Vitamin B complex,Hydration therapy,Tenofovir Entecavir Lamivudine Paracetamol Vitamin B complex Hydration therapy
+hepatitis c,Sofosbuvir,Velpatasvir,Paracetamol,Vitamin B complex,Hydration therapy,Zinc,Sofosbuvir Velpatasvir Paracetamol Vitamin B complex Hydration therapy Zinc
+typhoid,Ciprofloxacin,Ofloxacin,Azithromycin,Paracetamol,ORS,Hydration therapy,Ciprofloxacin Ofloxacin Azithromycin Paracetamol ORS Hydration therapy
+cholera,ORS,Zinc,Ciprofloxacin,Doxycycline,Hydration therapy,Electrolyte solution,ORS Zinc Ciprofloxacin Doxycycline Hydration therapy Electrolyte solution
+leptospirosis,Doxycycline,Azithromycin,Paracetamol,ORS,Hydration therapy,Vitamin C,Doxycycline Azithromycin Paracetamol ORS Hydration therapy Vitamin C
+rabies,Rabies vaccine,Rabies immunoglobulin,Tetanus prophylaxis,Paracetamol,Hydration therapy,Wound cleaning,Rabies vaccine Rabies immunoglobulin Tetanus prophylaxis Paracetamol Hydration therapy Wound cleaning
+tetanus,Tetanus toxoid,Tetanus immunoglobulin,Antibiotic therapy,Paracetamol,Muscle relaxants,Hydration therapy,Tetanus toxoid Tetanus immunoglobulin Antibiotic therapy Paracetamol Muscle relaxants Hydration therapy
+measles,Vitamin A,Paracetamol,Antihistamine,Hydration therapy,Calamine lotion,Supportive care,Vitamin A Paracetamol Antihistamine Hydration therapy Calamine lotion Supportive care
+mumps,Paracetamol,Ibuprofen,Hydration therapy,Ice packs,Soft diet,Vitamin C,Paracetamol Ibuprofen Hydration therapy Ice packs Soft diet Vitamin C
+rubella,Paracetamol,Ibuprofen,Hydration therapy,Vitamin C,Rest,Supportive care,Paracetamol Ibuprofen Hydration therapy Vitamin C Rest Supportive care
+whooping cough,Azithromycin,Erythromycin,Paracetamol,Hydration therapy,Steam inhalation,Saline drops,Azithromycin Erythromycin Paracetamol Hydration therapy Steam inhalation Saline drops
+scarlet fever,Penicillin,Amoxicillin,Paracetamol,Antihistamine,Hydration therapy,Steam inhalation,Penicillin Amoxicillin Paracetamol Antihistamine Hydration therapy Steam inhalation
+polio,IPV/OPV vaccine,Supportive care,Paracetamol,Hydration therapy,Physiotherapy,Vitamin C,IPV/OPV vaccine Supportive care Paracetamol Hydration therapy Physiotherapy Vitamin C
+ringworm,Clotrimazole cream,Miconazole cream,Ketoconazole cream,Antifungal soap,Moisturizer,Hygiene care,Clotrimazole cream Miconazole cream Ketoconazole cream Antifungal soap Moisturizer Hygiene care
+scabies,Permethrin cream,Crotamiton cream,Antihistamine,Hydrocortisone,Clean clothing,Moisturizer,Permethrin cream Crotamiton cream Antihistamine Hydrocortisone Clean clothing Moisturizer
+malnutrition,Protein supplements,Multivitamins,Iron,Zinc,Folic acid,Vitamin D,Protein supplements Multivitamins Iron Zinc Folic acid Vitamin D
+anemia,Iron supplements,Folic acid,Vitamin B12,Vitamin C,Multivitamins,Protein diet,Iron supplements Folic acid Vitamin B12 Vitamin C Multivitamins Protein diet
+hypothyroidism,Levothyroxine,Selenium,Vitamin D,Iodized salt,Protein diet,Supportive care,Levothyroxine Selenium Vitamin D Iodized salt Protein diet Supportive care
+hyperthyroidism,Methimazole,Propylthiouracil,Beta-blockers,Hydration therapy,Paracetamol,Supportive care,Methimazole Propylthiouracil Beta-blockers Hydration therapy Paracetamol Supportive care
+arthritis,Ibuprofen,Naproxen,Diclofenac,Paracetamol,Glucosamine,Chondroitin,Ibuprofen Naproxen Diclofenac Paracetamol Glucosamine Chondroitin
+osteoporosis,Calcium,Vitamin D,Bisphosphonates,Vitamin K,Protein supplements,Exercise therapy,Calcium Vitamin D Bisphosphonates Vitamin K Protein supplements Exercise therapy
+depression,Escitalopram,Sertraline,Fluoxetine,Vitamin D,Omega-3,Cognitive therapy,Escitalopram Sertraline Fluoxetine Vitamin D Omega-3 Cognitive therapy
+anxiety,Diazepam,Lorazepam,Escitalopram,Beta-blockers,Vitamin B complex,Cognitive therapy,Diazepam Lorazepam Escitalopram Beta-blockers Vitamin B complex Cognitive therapy
+insomnia,Melatonin,Zolpidem,Lorazepam,Valerian,Magnesium,Sleep hygiene,Melatonin Zolpidem Lorazepam Valerian Magnesium Sleep hygiene
+epilepsy,Levetiracetam,Sodium valproate,Phenytoin,Clobazam,Lamotrigine,Folic acid,Levetiracetam Sodium valproate Phenytoin Clobazam Lamotrigine Folic acid
+stroke,Aspirin,Clopidogrel,Atorvastatin,Paracetamol,Physiotherapy,Hydration therapy,Aspirin Clopidogrel Atorvastatin Paracetamol Physiotherapy Hydration therapy
+heart attack,Aspirin,Clopidogrel,Atorvastatin,Nitroglycerin,Beta-blockers,ACE inhibitors,Aspirin Clopidogrel Atorvastatin Nitroglycerin Beta-blockers ACE inhibitors
+allergy,Cetirizine,Levocetirizine,Loratadine,Prednisolone,Hydrocortisone cream,Antihistamine drops,Cetirizine Levocetirizine Loratadine Prednisolone Hydrocortisone cream Antihistamine drops
