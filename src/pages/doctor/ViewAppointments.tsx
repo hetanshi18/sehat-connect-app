@@ -79,30 +79,20 @@ const ViewAppointments = () => {
 
       if (slotError) throw slotError;
 
-      // Check if appointment is within 6 hours and send immediate reminder
-      if (appointment) {
-        const startTime = appointment.time.split(' - ')[0]; // Extract start time from range
-        const appointmentDateTime = new Date(`${appointment.date}T${startTime}`);
-        const now = new Date();
-        const hoursDiff = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-        
-        console.log('Appointment timing check:', {
-          date: appointment.date,
-          time: appointment.time,
-          startTime,
-          appointmentDateTime: appointmentDateTime.toISOString(),
-          hoursDiff
+      // Send WhatsApp notification immediately upon approval
+      console.log('Sending WhatsApp notification for approved appointment:', appointmentId);
+      try {
+        const { data, error } = await supabase.functions.invoke('send-appointment-reminders', {
+          body: { appointmentId }
         });
         
-        if (hoursDiff <= 6 && hoursDiff > 0) {
-          console.log('Sending immediate reminder for appointment:', appointmentId);
-          // Send immediate reminder with appointment ID
-          supabase.functions.invoke('send-appointment-reminders', {
-            body: { appointmentId }
-          }).catch(err => {
-            console.error('Failed to send immediate reminder:', err);
-          });
+        if (error) {
+          console.error('Failed to send WhatsApp notification:', error);
+        } else {
+          console.log('WhatsApp notification sent successfully:', data);
         }
+      } catch (err) {
+        console.error('Error invoking WhatsApp notification:', err);
       }
 
       toast({ title: 'Success', description: 'Appointment confirmed successfully!' });

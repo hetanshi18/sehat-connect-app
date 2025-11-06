@@ -160,10 +160,10 @@ Deno.serve(async (req) => {
         specificAppointmentId: specificAppointmentId || 'none'
       });
 
-      // For immediate reminders (specificAppointmentId), send if within 6 hours
+      // For immediate reminders (specificAppointmentId), always send
       // For scheduled checks, send if 6-7 hours away
       const shouldSend = specificAppointmentId 
-        ? (hoursDiff <= 6 && hoursDiff > 0) 
+        ? true  // Always send when called with specific appointment ID
         : (hoursDiff >= 6 && hoursDiff <= 7);
 
       if (shouldSend) {
