@@ -14,8 +14,7 @@ Original file is located at
 #!pip install transformers==4.57.1
 
 import transformers
-print(transformers.__version__)
-
+import os
 import torch
 import numpy as np
 from datasets import Dataset
@@ -82,9 +81,13 @@ def load_bio_file(file_path):
     dataset = Dataset.from_dict({"tokens": tokens, "labels": encoded_labels})
     return dataset, label2id, id2label
 
+BASE_DIR = os.path.dirname(__file__)   # folder: sehat-connect-app/app/
+BIO_FILE_PATH = os.path.join(BASE_DIR, "sample_bio_cleaned.txt")
 
+dataset, label2id, id2label = load_bio_file(BIO_FILE_PATH)
+print(transformers.__version__)
 # Example usage
-dataset, label2id, id2label = load_bio_file("sample_bio_cleaned.txt")
+dataset, label2id, id2label = load_bio_file("app/sample_bio_cleaned.txt")
 
 print("Sample:", dataset[0])
 print("Label2id mapping:", label2id)

@@ -9,7 +9,7 @@ Original file is located at
 
 # app/pipeline.py
 from app.translate_module import detect_and_translate
-from app.symptom_extraction_module import extract_symptoms
+from app.symptom_extraction_inference import extract_symptoms
 from app.disease_module import predict_disease
 from app.medicine_module import recommend_meds
 

@@ -1,14 +1,31 @@
-transformers==4.45.1
-torch>=2.1.0
-datasets==3.0.2
-langdetect==1.0.9
-pandas==2.2.2
+# Core
 numpy==1.26.4
-scikit-learn==1.5.1
-seqeval==1.2.2
-accelerate==0.34.2
-fastapi==0.111.0
-uvicorn==0.30.1
+pandas==2.2.2
+scikit-learn==1.4.2
 joblib==1.4.2
+
+# ML Models & NLP
+xgboost==2.0.3
+rapidfuzz==3.9.3
+
+# Transformers / HuggingFace
+transformers==4.37.2
+tokenizers==0.15.2
+datasets==2.18.0
+seqeval==1.2.2
+accelerate==0.28.0
+
+# PyTorch (required for BioBERT)
+torch==2.2.0
+torchvision==0.17.0
+torchaudio==2.2.0
+
+# Translation
+langdetect==1.0.9
 sentencepiece==0.2.0
-tf-keras
+
+# Flask API
+Flask==3.0.2
+
+# Utility
+protobuf==4.25.3
