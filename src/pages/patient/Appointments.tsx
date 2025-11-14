@@ -173,7 +173,12 @@ const Appointments = () => {
                           <span>{apt.time}</span>
                         </div>
                       </div>
-                      <Button className="w-full">Join Consultation</Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => navigate(`/video-call?appointmentId=${apt.id}&patientName=${user?.email?.split('@')[0] || 'Patient'}&doctorName=${apt.profiles?.name || 'Doctor'}&role=patient`)}
+                      >
+                        Join Consultation
+                      </Button>
                     </CardContent>
                   </Card>
                 ))
