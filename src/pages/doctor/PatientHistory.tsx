@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, User, Mail, Phone, Calendar, Clock, FileText, Activity, ChevronDown, TrendingUp } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, Calendar, Clock, FileText, Activity, ChevronDown, TrendingUp, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -40,6 +40,14 @@ interface AppointmentHistory {
   follow_up_date?: string;
 }
 
+interface HealthRecord {
+  id: string;
+  title: string;
+  type: string;
+  file_url?: string;
+  created_at: string;
+}
+
 const PatientHistory = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -48,6 +56,7 @@ const PatientHistory = () => {
   const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
   const [patientProfile, setPatientProfile] = useState<Patient | null>(null);
   const [appointmentHistory, setAppointmentHistory] = useState<AppointmentHistory[]>([]);
+  const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([]);
   const [totalAppointments, setTotalAppointments] = useState(0);
   const [completedFollowUps, setCompletedFollowUps] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -152,6 +161,16 @@ const PatientHistory = () => {
         .eq('patient_id', selectedPatientId)
         .eq('doctor_id', user.id)
         .order('created_at', { ascending: false });
+
+      // Fetch health records
+      const { data: records, error: recordsError } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('patient_id', selectedPatientId)
+        .order('created_at', { ascending: false });
+
+      if (recordsError) throw recordsError;
+      setHealthRecords(records || []);
 
       // Combine data
       const history: AppointmentHistory[] = appointments?.map(apt => {
@@ -324,6 +343,48 @@ const PatientHistory = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Health Records */}
+            {healthRecords.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Health Records
+                  </CardTitle>
+                  <CardDescription>Documents uploaded by patient</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {healthRecords.map(record => (
+                      <div key={record.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/5 transition-colors">
+                        <div className="flex-1">
+                          <p className="font-medium">{record.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {record.type}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(record.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        {record.file_url && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(record.file_url, '_blank')}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Treatment Progress Summary */}
             <Card>
