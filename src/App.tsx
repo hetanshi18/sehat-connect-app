@@ -64,6 +64,11 @@ const App = () => {
                 <VideoCall />
               </ProtectedRoute>
             } />
+            <Route path="/video-call" element={
+              <ProtectedRoute>
+                <VideoCall />
+              </ProtectedRoute>
+            } />
             <Route path="/profile" element={
               <ProtectedRoute requiredRole="patient">
                 <PatientProfile />
