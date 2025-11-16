@@ -16,6 +16,8 @@ const Symptoms = () => {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [showReport, setShowReport] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [backendResults, setBackendResults] = useState<any>(null);
 
   const handleSymptomToggle = (symptomId: string) => {
     setSelectedSymptoms(prev => 
@@ -25,14 +27,47 @@ const Symptoms = () => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSymptoms.length === 0) {
       toast({ title: 'Error', description: 'Please select at least one symptom', variant: 'destructive' });
       return;
     }
-    setShowReport(true);
-    toast({ title: 'Success', description: 'Symptoms recorded successfully' });
+
+    setIsLoading(true);
+    try {
+      const selectedSymptomNames = mockSymptoms
+        .filter(s => selectedSymptoms.includes(s.id))
+        .map(s => s.name);
+      
+      const symptomText = selectedSymptomNames.join(', ') + (additionalNotes ? `. ${additionalNotes}` : '');
+
+      const response = await fetch('http://localhost:8000/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: symptomText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get prediction from backend');
+      }
+
+      const data = await response.json();
+      setBackendResults(data);
+      setShowReport(true);
+      toast({ title: 'Success', description: 'Analysis complete' });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({ 
+        title: 'Error', 
+        description: 'Failed to connect to backend. Make sure the Flask server is running on port 8000.', 
+        variant: 'destructive' 
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDownloadReport = () => {
@@ -104,19 +139,54 @@ This is a preliminary report. Please consult with a healthcare professional for 
                   <p className="text-muted-foreground">{additionalNotes}</p>
                 </div>
               )}
+
+              {backendResults && (
+                <>
+                  {backendResults.disease_info?.predictions?.length > 0 && (
+                    <div className="bg-amber-50 dark:bg-amber-950 p-4 rounded-lg border-l-4 border-amber-600">
+                      <h3 className="font-semibold mb-2 flex items-center gap-2 text-amber-900 dark:text-amber-100">
+                        <AlertCircle className="h-5 w-5" />
+                        Predicted Conditions
+                      </h3>
+                      <ul className="space-y-2 text-sm">
+                        {backendResults.disease_info.predictions.slice(0, 3).map((pred: any, idx: number) => (
+                          <li key={idx} className="text-amber-800 dark:text-amber-200">
+                            • {pred.disease} ({(pred.probability * 100).toFixed(1)}% probability)
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {backendResults.medicines?.length > 0 && (
+                    <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border-l-4 border-green-600">
+                      <h3 className="font-semibold mb-2 flex items-center gap-2 text-green-900 dark:text-green-100">
+                        💊 Recommended Medicines
+                      </h3>
+                      <ul className="space-y-2 text-sm">
+                        {backendResults.medicines.map((med: string, idx: number) => (
+                          <li key={idx} className="text-green-800 dark:text-green-200">• {med}</li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-green-700 dark:text-green-300 mt-3 italic">
+                        Based on predicted condition: {backendResults.matched_disease_for_meds}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
               
               <div className="bg-accent/10 p-4 rounded-lg border-l-4 border-accent">
                 <h3 className="font-semibold text-accent mb-2 flex items-center gap-2">
                   <AlertCircle className="h-5 w-5" />
-                  Preliminary Advice
+                  Important Notice
                 </h3>
                 <p className="text-sm text-foreground">
-                  Based on your symptoms, we recommend:
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Rest and stay hydrated</li>
-                    <li>Monitor temperature if fever persists</li>
-                    <li>Consult a doctor if symptoms worsen</li>
-                    <li>Avoid self-medication without professional advice</li>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>This is a preliminary AI-based analysis</li>
+                    <li>Always consult a healthcare professional for proper diagnosis</li>
+                    <li>Do not self-medicate without professional advice</li>
+                    <li>Seek immediate medical attention if symptoms worsen</li>
                   </ul>
                 </p>
               </div>
@@ -193,8 +263,8 @@ This is a preliminary report. Please consult with a healthcare professional for 
                 />
               </div>
               
-              <Button type="submit" className="w-full" size="lg">
-                Record Symptoms
+              <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                {isLoading ? 'Analyzing...' : 'Analyze Symptoms'}
               </Button>
             </form>
           </CardContent>
