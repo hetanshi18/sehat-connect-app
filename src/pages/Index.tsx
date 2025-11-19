@@ -32,7 +32,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
                   1
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
@@ -47,7 +47,7 @@ const Index = () => {
 
             <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
                   2
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
@@ -62,7 +62,7 @@ const Index = () => {
 
             <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
                   3
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
@@ -77,7 +77,7 @@ const Index = () => {
 
             <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
                   4
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
