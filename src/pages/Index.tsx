@@ -2,53 +2,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Heart, Video, Calendar, TrendingUp, FileText, Clock, Shield, Users } from "lucide-react";
+import HeroSection from "@/components/ui/hero-section";
 
 const Index = () => {
   const navigate = useNavigate();
 
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Sehat Sathi</span>
-          </div>
-          <Button onClick={() => navigate("/auth")}>Get Started</Button>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-              Your Health,
-              <span className="text-primary"> Anytime, Anywhere</span>
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Smart telemedicine kiosk platform for instant doctor consultations, symptom analysis, and comprehensive health tracking.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" onClick={() => navigate("/auth")}>
-                Start Consultation
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate("/auth")}>
-                Learn More
-              </Button>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="aspect-square rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <Heart className="h-48 w-48 text-primary/40" />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section with Animation */}
+      <HeroSection 
+        onGetStarted={() => navigate("/auth")}
+        onLearnMore={scrollToFeatures}
+      />
 
       {/* Features Section */}
-      <section className="bg-muted/50 py-20">
+      <section id="features" className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">Complete Healthcare Solution</h2>
