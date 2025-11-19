@@ -30,49 +30,61 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                  1
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <Video className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Video Consultations</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold relative z-10">Video Consultations</h3>
+                <p className="text-muted-foreground relative z-10">
                   Connect face-to-face with specialist doctors through secure video calls
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                  2
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Symptom Analysis</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold relative z-10">Symptom Analysis</h3>
+                <p className="text-muted-foreground relative z-10">
                   AI-powered symptom checker with medicine recommendations
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                  3
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Easy Scheduling</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold relative z-10">Easy Scheduling</h3>
+                <p className="text-muted-foreground relative z-10">
                   Book appointments instantly with available doctors
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
               <CardContent className="pt-6 space-y-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <div className="absolute top-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                  4
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold">Health Tracking</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl font-semibold relative z-10">Health Tracking</h3>
+                <p className="text-muted-foreground relative z-10">
                   Monitor your health trends and maintain complete medical history
                 </p>
               </CardContent>
