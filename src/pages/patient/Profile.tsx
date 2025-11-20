@@ -8,10 +8,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfileDialog } from '@/components/EditProfileDialog';
 import { HealthDocumentUpload } from '@/components/HealthDocumentUpload';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PatientProfile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [patientInfo, setPatientInfo] = useState<any>(null);
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
 
@@ -57,30 +59,30 @@ const PatientProfile = () => {
   };
 
   const profileDetails = [
-    { icon: User, label: 'Name', value: user?.user_metadata?.name || 'N/A' },
-    { icon: Mail, label: 'Email', value: user?.email || 'N/A' },
-    { icon: Phone, label: 'Phone', value: user?.user_metadata?.phone || 'Not provided' },
-    { icon: Droplet, label: 'Blood Group', value: patientInfo?.blood_group || 'Not provided' },
-    { icon: MapPin, label: 'Address', value: patientInfo?.address || 'Not provided' },
+    { icon: User, label: t('profile.name'), value: user?.user_metadata?.name || 'N/A' },
+    { icon: Mail, label: t('profile.email'), value: user?.email || 'N/A' },
+    { icon: Phone, label: t('profile.phone'), value: user?.user_metadata?.phone || t('profile.notProvided') },
+    { icon: Droplet, label: t('profile.bloodGroup'), value: patientInfo?.blood_group || t('profile.notProvided') },
+    { icon: MapPin, label: t('profile.address'), value: patientInfo?.address || t('profile.notProvided') },
   ];
 
   const reports = healthRecords.filter(r => r.type === 'report');
   const prescriptions = healthRecords.filter(r => r.type === 'prescription');
 
   return (
-    <DashboardLayout title="Patient Profile">
+    <DashboardLayout title={t('profile.title')}>
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t('dashboard.backToDashboard')}
         </Button>
 
         <div className="grid gap-6 md:grid-cols-3">
           {/* Profile Info */}
           <Card className="md:col-span-2 shadow-soft">
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Your basic health profile details</CardDescription>
+              <CardTitle>{t('profile.personalInfo')}</CardTitle>
+              <CardDescription>{t('profile.profileDetails')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {profileDetails.map((detail) => {
