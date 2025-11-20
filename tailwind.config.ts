@@ -98,57 +98,12 @@ export default {
             transform: "translateX(0)",
           },
         },
-        first: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
-        },
-        second: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
-        },
-        third: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
-        },
-        fourth: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
-        },
-        fifth: {
-          "0%": {
-            transform: "rotate(0deg)",
-          },
-          "100%": {
-            transform: "rotate(360deg)",
-          },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
-        first: "first 30s linear infinite",
-        second: "second 40s linear infinite",
-        third: "third 35s linear infinite",
-        fourth: "fourth 38s linear infinite",
-        fifth: "fifth 33s linear infinite",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
