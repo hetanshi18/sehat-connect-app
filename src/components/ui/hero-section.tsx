@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Boxes } from "@/components/ui/background-boxes";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -13,7 +14,11 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
   const { t } = useLanguage();
 
   return (
-    <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-center">
+    <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-center overflow-hidden">
+      {/* Background boxes effect */}
+      <div className="absolute inset-0 w-full h-full bg-background z-0 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
+      <Boxes />
+      
       <HeroNavbar onGetStarted={onGetStarted} />
       
       {/* Decorative borders */}
