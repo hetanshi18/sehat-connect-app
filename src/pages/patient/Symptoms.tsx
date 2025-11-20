@@ -32,7 +32,7 @@ const Symptoms = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedSymptoms.length === 0) {
-      toast({ title: 'Error', description: 'Please select at least one symptom', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('symptoms.selectOne'), variant: 'destructive' });
       return;
     }
 
@@ -59,7 +59,7 @@ const Symptoms = () => {
       const data = await response.json();
       setBackendResults(data);
       setShowReport(true);
-      toast({ title: 'Success', description: 'Analysis complete' });
+      toast({ title: t('common.success'), description: t('symptoms.analysisComplete') });
     } catch (error) {
       console.error('Error:', error);
       toast({ 
@@ -108,18 +108,18 @@ This is a preliminary report. Please consult with a healthcare professional for 
     const selectedSymptomNames = mockSymptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name);
     
     return (
-      <DashboardLayout title="Temporary Medication Report">
+      <DashboardLayout title={t('symptoms.reportTitle')}>
         <div className="max-w-2xl">
           <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            {t('dashboard.backToDashboard')}
           </Button>
           
           <Card className="shadow-medium">
             <CardHeader className="bg-gradient-primary text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Symptom Analysis Report
+                {t('symptoms.reportTitle')}
               </CardTitle>
               <CardDescription className="text-white/80">
                 Generated on {new Date().toLocaleDateString()}
@@ -127,7 +127,7 @@ This is a preliminary report. Please consult with a healthcare professional for 
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
               <div>
-                <h3 className="font-semibold mb-2">Reported Symptoms:</h3>
+                <h3 className="font-semibold mb-2">{t('symptoms.reportedSymptoms')}:</h3>
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                   {selectedSymptomNames.map(name => (
                     <li key={name}>{name}</li>
