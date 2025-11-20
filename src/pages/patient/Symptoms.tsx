@@ -10,9 +10,11 @@ import { ArrowLeft, AlertCircle, FileText, Download } from 'lucide-react';
 import { mockSymptoms } from '@/lib/mockData';
 import { toast } from '@/hooks/use-toast';
 import { HealthDocumentUpload } from '@/components/HealthDocumentUpload';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Symptoms = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [showReport, setShowReport] = useState(false);

@@ -7,10 +7,12 @@ import { Calendar, Users, Clock, User, FileText, History } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [pendingCount, setPendingCount] = useState(0);
   const [confirmedCount, setConfirmedCount] = useState(0);
   const [totalPatients, setTotalPatients] = useState(0);
@@ -55,47 +57,47 @@ const DoctorDashboard = () => {
   };
 
   const menuItems = [
-    { title: "Pending Requests", description: `${pendingCount} waiting for approval`, icon: Calendar, path: '/doctor/view-appointments', color: 'bg-gradient-primary', count: pendingCount },
-    { title: 'Patient History', description: 'View complete patient records', icon: History, path: '/doctor/patient-history', color: 'bg-gradient-secondary', count: totalPatients },
-    { title: 'Manage Slots', description: 'Set your availability', icon: Clock, path: '/doctor/manage-slots', color: 'bg-gradient-warm', count: null },
-    { title: 'My Profile', description: 'Update professional details', icon: User, path: '/doctor/profile', color: 'bg-primary', count: null },
+    { title: t('dashboard.pendingRequests'), description: `${pendingCount} ${t('dashboard.waitingApproval')}`, icon: Calendar, path: '/doctor/view-appointments', color: 'bg-gradient-primary', count: pendingCount },
+    { title: t('dashboard.patientHistory'), description: t('dashboard.viewRecords'), icon: History, path: '/doctor/patient-history', color: 'bg-gradient-secondary', count: totalPatients },
+    { title: t('dashboard.manageSlots'), description: t('dashboard.setAvailability'), icon: Clock, path: '/doctor/manage-slots', color: 'bg-gradient-warm', count: null },
+    { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/doctor/profile', color: 'bg-primary', count: null },
   ];
 
   return (
-    <DashboardLayout title="Doctor Dashboard">
+    <DashboardLayout title={t('dashboard.doctorTitle')}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.pendingRequests')}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{pendingCount}</div>
-              <p className="text-xs text-muted-foreground">Awaiting approval</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.awaitingApproval')}</p>
             </CardContent>
           </Card>
           
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.totalPatients')}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-secondary">{totalPatients}</div>
-              <p className="text-xs text-muted-foreground">Unique patients</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.uniquePatients')}</p>
             </CardContent>
           </Card>
           
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.confirmedAppointments')}</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-accent">{confirmedCount}</div>
-              <p className="text-xs text-muted-foreground">Approved appointments</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.scheduled')}</p>
             </CardContent>
           </Card>
         </div>

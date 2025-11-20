@@ -9,9 +9,12 @@ import { Stethoscope, UserCircle, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { getUserRole } from '@/lib/auth';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [role, setRole] = useState<'patient' | 'doctor'>('patient');
   
   const [loginData, setLoginData] = useState({ email: '', password: '' });
@@ -20,7 +23,7 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
-      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+      toast({ title: t('auth.error'), description: t('auth.errorFillFields'), variant: 'destructive' });
       return;
     }
     
@@ -30,13 +33,13 @@ const Auth = () => {
     });
 
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('auth.error'), description: error.message, variant: 'destructive' });
       return;
     }
 
     if (data.user) {
       const userRole = await getUserRole(data.user.id);
-      toast({ title: 'Success', description: 'Welcome back!' });
+      toast({ title: t('auth.success'), description: t('auth.successWelcome') });
       navigate(userRole === 'patient' ? '/dashboard' : '/doctor/dashboard');
     }
   };
@@ -44,7 +47,7 @@ const Auth = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!signupData.email || !signupData.password || !signupData.name) {
-      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+      toast({ title: t('auth.error'), description: t('auth.errorFillFields'), variant: 'destructive' });
       return;
     }
     
@@ -61,27 +64,30 @@ const Auth = () => {
     });
 
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('auth.error'), description: error.message, variant: 'destructive' });
       return;
     }
 
     if (data.user) {
       toast({ 
-        title: 'Success', 
-        description: 'Account created! Please check your email to verify your account.' 
+        title: t('auth.success'), 
+        description: t('auth.successAccountCreated')
       });
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md shadow-medium animate-fade-in">
         <CardHeader className="space-y-3 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary">
             <Stethoscope className="h-10 w-10 text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold">Sehat Sathi</CardTitle>
-          <CardDescription>Smart Telemedicine Kiosk</CardDescription>
+          <CardTitle className="text-3xl font-bold">{t('auth.title')}</CardTitle>
+          <CardDescription>{t('auth.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex gap-2">
@@ -91,7 +97,7 @@ const Auth = () => {
               onClick={() => setRole('patient')}
             >
               <UserCircle className="mr-2 h-4 w-4" />
-              Patient
+              {t('auth.patient')}
             </Button>
             <Button
               variant={role === 'doctor' ? 'default' : 'outline'}
@@ -99,31 +105,31 @@ const Auth = () => {
               onClick={() => setRole('doctor')}
             >
               <User className="mr-2 h-4 w-4" />
-              Doctor
+              {t('auth.doctor')}
             </Button>
           </div>
 
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login">{t('auth.signIn')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+                  <Label htmlFor="login-email">{t('auth.email')}</Label>
                   <Input
                     id="login-email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t('auth.email')}
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                  <Label htmlFor="login-password">{t('auth.password')}</Label>
                   <Input
                     id="login-password"
                     type="password"
@@ -134,7 +140,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full">
-                  Sign In as {role === 'patient' ? 'Patient' : 'Doctor'}
+                  {t('auth.loginButton')}
                 </Button>
               </form>
             </TabsContent>
@@ -142,29 +148,29 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Label htmlFor="signup-name">{t('auth.name')}</Label>
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder={t('auth.name')}
                     value={signupData.name}
                     onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t('auth.email')}</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t('auth.email')}
                     value={signupData.email}
                     onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t('auth.password')}</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -175,7 +181,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full">
-                  Sign Up as {role === 'patient' ? 'Patient' : 'Doctor'}
+                  {t('auth.signupButton')}
                 </Button>
               </form>
             </TabsContent>
