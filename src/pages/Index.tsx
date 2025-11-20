@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Heart, Video, Calendar, TrendingUp, FileText, Clock, Shield, Users } from "lucide-react";
 import HeroSection from "@/components/ui/hero-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -14,12 +15,31 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section with Animation */}
-      <HeroSection 
-        onGetStarted={() => navigate("/auth")}
-        onLearnMore={scrollToFeatures}
-      />
+    <div className="relative min-h-screen">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0">
+        <BackgroundGradientAnimation
+          gradientBackgroundStart="rgb(230, 240, 250)"
+          gradientBackgroundEnd="rgb(250, 251, 253)"
+          firstColor="17, 113, 208"
+          secondColor="51, 204, 127"
+          thirdColor="100, 180, 255"
+          fourthColor="249, 128, 31"
+          fifthColor="17, 113, 208"
+          pointerColor="17, 113, 208"
+          size="80%"
+          interactive={true}
+          containerClassName="!h-full !w-full"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Hero Section with Animation */}
+        <HeroSection 
+          onGetStarted={() => navigate("/auth")}
+          onLearnMore={scrollToFeatures}
+        />
 
       {/* Features Section */}
       <section id="features" className="bg-muted/50 py-20">
@@ -224,6 +244,7 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 };
