@@ -137,7 +137,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Benefits */}
+      {/* Benefits Section */}
       <section className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -147,9 +147,9 @@ const Index = () => {
                   <Clock className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Save Time</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t('howItWorks.saveTimeTitle')}</h3>
                   <p className="text-muted-foreground">
-                    No waiting rooms or travel time. Get consultations from anywhere.
+                    {t('howItWorks.saveTimeDesc')}
                   </p>
                 </div>
               </div>
@@ -159,21 +159,21 @@ const Index = () => {
                   <Shield className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Secure & Private</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t('howItWorks.secureTitle')}</h3>
                   <p className="text-muted-foreground">
-                    Your health data is encrypted and protected with industry-leading security.
+                    {t('howItWorks.secureDesc')}
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Users className="h-6 w-6 text-primary" />
+                  <Users className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Expert Doctors</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t('howItWorks.expertDoctorsTitle')}</h3>
                   <p className="text-muted-foreground">
-                    Access to qualified healthcare professionals across specialties.
+                    {t('howItWorks.expertDoctorsDesc')}
                   </p>
                 </div>
               </div>
