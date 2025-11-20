@@ -4,40 +4,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock, User } from 'lucide-react';
 import { mockAppointments } from '@/lib/mockData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const upcomingAppointment = mockAppointments.find(apt => apt.status === 'scheduled');
   const totalConsultations = mockAppointments.length;
 
   const menuItems = [
-    { title: 'My Appointments', description: 'View your scheduled appointments', icon: Calendar, path: '/appointments', color: 'bg-gradient-primary' },
-    { title: 'Book Consultation', description: 'Schedule a doctor appointment', icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
-    { title: 'Record Symptoms', description: 'Log your current symptoms', icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
-    { title: 'Health Trends', description: 'View your health analytics', icon: TrendingUp, path: '/trends', color: 'bg-primary' },
-    { title: 'My Profile', description: 'View and edit your profile', icon: User, path: '/profile', color: 'bg-accent' },
+    { title: t('dashboard.myAppointments'), description: t('dashboard.viewScheduled'), icon: Calendar, path: '/appointments', color: 'bg-gradient-primary' },
+    { title: t('dashboard.bookConsultation'), description: t('dashboard.scheduleDoctor'), icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
+    { title: t('dashboard.recordSymptoms'), description: t('dashboard.logSymptoms'), icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
+    { title: t('dashboard.healthTrends'), description: t('dashboard.viewAnalytics'), icon: TrendingUp, path: '/trends', color: 'bg-primary' },
+    { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/profile', color: 'bg-accent' },
   ];
 
   return (
-    <DashboardLayout title="Patient Dashboard">
+    <DashboardLayout title={t('dashboard.patientTitle')}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Consultations</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.totalConsultations')}</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{totalConsultations}</div>
-              <p className="text-xs text-muted-foreground">Lifetime appointments</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.lifetimeAppointments')}</p>
             </CardContent>
           </Card>
           
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Next Appointment</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.nextAppointment')}</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -47,26 +49,26 @@ const PatientDashboard = () => {
                   <p className="text-xs text-muted-foreground">{upcomingAppointment.time} - {upcomingAppointment.doctorName}</p>
                 </>
               ) : (
-                <div className="text-sm text-muted-foreground">No upcoming appointments</div>
+                <div className="text-sm text-muted-foreground">{t('dashboard.noUpcoming')}</div>
               )}
             </CardContent>
           </Card>
           
           <Card className="shadow-soft">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('dashboard.recentActivity')}</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-accent">2 days ago</div>
-              <p className="text-xs text-muted-foreground">Last consultation</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.lastConsultation')}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Menu */}
         <div>
-          <h3 className="mb-4 text-xl font-semibold text-foreground">Quick Actions</h3>
+          <h3 className="mb-4 text-xl font-semibold text-foreground">{t('dashboard.quickActions')}</h3>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
