@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -8,6 +10,8 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="relative mx-auto flex max-w-7xl flex-col items-center justify-center">
       <HeroNavbar onGetStarted={onGetStarted} />
@@ -26,7 +30,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
       <div className="px-4 py-10 md:py-20">
         {/* Animated heading */}
         <h1 className="relative z-10 mx-auto max-w-4xl text-center text-2xl font-bold text-foreground md:text-4xl lg:text-7xl">
-          {"Your Health, Anytime, Anywhere"
+          {t('hero.title')
             .split(" ")
             .map((word, index) => (
               <motion.span
@@ -52,7 +56,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
           transition={{ duration: 0.3, delay: 0.8 }}
           className="relative z-10 mx-auto max-w-xl py-4 text-center text-lg font-normal text-muted-foreground"
         >
-          Smart telemedicine kiosk platform for instant doctor consultations, symptom analysis, and comprehensive health tracking. Get expert care in minutes, not hours.
+          {t('hero.subtitle')}
         </motion.p>
 
         {/* Animated buttons */}
@@ -67,7 +71,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
             onClick={onGetStarted}
             className="w-60 transform transition-all duration-300 hover:-translate-y-0.5"
           >
-            Start Consultation
+            {t('hero.cta')}
           </Button>
           <Button
             size="lg"
@@ -75,7 +79,7 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
             onClick={onLearnMore}
             className="w-60 transform transition-all duration-300 hover:-translate-y-0.5"
           >
-            Learn More
+            {t('nav.features')}
           </Button>
         </motion.div>
 
@@ -98,18 +102,23 @@ export default function HeroSection({ onGetStarted, onLearnMore }: HeroSectionPr
 }
 
 const HeroNavbar = ({ onGetStarted }: { onGetStarted: () => void }) => {
+  const { t } = useLanguage();
+  
   return (
     <nav className="flex w-full items-center justify-between border-t border-b border-border px-4 py-4">
       <div className="flex items-center gap-2">
         <Heart className="h-6 w-6 text-primary" />
         <h1 className="text-base font-bold md:text-2xl">Sehat Sathi</h1>
       </div>
-      <Button
-        onClick={onGetStarted}
-        className="w-24 transform transition-all duration-300 hover:-translate-y-0.5 md:w-32"
-      >
-        Login
-      </Button>
+      <div className="flex items-center gap-2">
+        <LanguageSwitcher />
+        <Button
+          onClick={onGetStarted}
+          className="w-24 transform transition-all duration-300 hover:-translate-y-0.5 md:w-32"
+        >
+          {t('nav.login')}
+        </Button>
+      </div>
     </nav>
   );
 };

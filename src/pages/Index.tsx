@@ -3,9 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Heart, Video, Calendar, TrendingUp, FileText, Clock, Shield, Users } from "lucide-react";
 import HeroSection from "@/components/ui/hero-section";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
@@ -23,9 +25,9 @@ const Index = () => {
       <section id="features" className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Complete Healthcare Solution</h2>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('features.title')}</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Everything you need for quality healthcare at your fingertips
+              {t('features.subtitle')}
             </p>
           </div>
           
@@ -38,9 +40,9 @@ const Index = () => {
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <Video className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold relative z-10">Video Consultations</h3>
+                <h3 className="text-xl font-semibold relative z-10">{t('features.videoConsult.title')}</h3>
                 <p className="text-muted-foreground relative z-10">
-                  Connect face-to-face with specialist doctors through secure video calls
+                  {t('features.videoConsult.description')}
                 </p>
               </CardContent>
             </Card>
@@ -53,9 +55,9 @@ const Index = () => {
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold relative z-10">Symptom Analysis</h3>
+                <h3 className="text-xl font-semibold relative z-10">{t('features.symptomAnalysis.title')}</h3>
                 <p className="text-muted-foreground relative z-10">
-                  AI-powered symptom checker with medicine recommendations
+                  {t('features.symptomAnalysis.description')}
                 </p>
               </CardContent>
             </Card>
@@ -68,9 +70,9 @@ const Index = () => {
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold relative z-10">Easy Scheduling</h3>
+                <h3 className="text-xl font-semibold relative z-10">{t('features.easyScheduling.title')}</h3>
                 <p className="text-muted-foreground relative z-10">
-                  Book appointments instantly with available doctors
+                  {t('features.easyScheduling.description')}
                 </p>
               </CardContent>
             </Card>
@@ -83,9 +85,9 @@ const Index = () => {
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
                   <TrendingUp className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold relative z-10">Health Tracking</h3>
+                <h3 className="text-xl font-semibold relative z-10">{t('features.healthTracking.title')}</h3>
                 <p className="text-muted-foreground relative z-10">
-                  Monitor your health trends and maintain complete medical history
+                  {t('features.healthTracking.description')}
                 </p>
               </CardContent>
             </Card>
@@ -191,9 +193,9 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <Card className="bg-primary text-primary-foreground border-0">
             <CardContent className="py-12 text-center space-y-6">
-              <h2 className="text-3xl lg:text-4xl font-bold">Ready to Get Started?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold">{t('cta.title')}</h2>
               <p className="text-xl text-primary-foreground/90 max-w-2xl mx-auto">
-                Join thousands of patients who trust Sehat Sathi for their healthcare needs
+                {t('cta.subtitle')}
               </p>
               <Button 
                 size="lg" 
@@ -201,7 +203,7 @@ const Index = () => {
                 onClick={() => navigate("/auth")}
                 className="text-lg px-8"
               >
-                Start Your Journey
+                {t('cta.button')}
               </Button>
             </CardContent>
           </Card>
