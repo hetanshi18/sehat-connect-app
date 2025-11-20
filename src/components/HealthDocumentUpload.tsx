@@ -7,6 +7,7 @@ import { Upload, FileText, Loader2, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HealthDocumentUploadProps {
   onUploadComplete?: () => void;
@@ -14,6 +15,7 @@ interface HealthDocumentUploadProps {
 
 export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadProps) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -26,7 +28,7 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
 
   const handleUpload = async () => {
     if (!file || !user || !title) {
-      toast({ title: 'Error', description: 'Please select a file and enter a title', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('healthDocument.error'), variant: 'destructive' });
       return;
     }
 
@@ -59,12 +61,12 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
 
       if (dbError) throw dbError;
 
-      toast({ title: 'Success', description: 'Document uploaded successfully!' });
+      toast({ title: t('common.success'), description: t('healthDocument.success') });
       setTitle('');
       setFile(null);
       if (onUploadComplete) onUploadComplete();
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setUploading(false);
     }
@@ -73,22 +75,22 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
   return (
     <Card className="shadow-soft">
       <CardHeader>
-        <CardTitle>Upload Health Document</CardTitle>
-        <CardDescription>Upload medical reports, prescriptions, or other health documents</CardDescription>
+        <CardTitle>{t('healthDocument.upload')}</CardTitle>
+        <CardDescription>{t('healthDocument.uploadDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="title">Document Title</Label>
+          <Label htmlFor="title">{t('healthDocument.title')}</Label>
           <Input
             id="title"
-            placeholder="e.g., Blood Test Report - Jan 2024"
+            placeholder={t('healthDocument.titlePlaceholder')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="file">Select File</Label>
+          <Label htmlFor="file">{t('healthDocument.selectFile')}</Label>
           <div className="flex items-center gap-2">
             <Input
               id="file"
@@ -123,12 +125,12 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
           {uploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
+              {t('healthDocument.uploading')}
             </>
           ) : (
             <>
               <Upload className="mr-2 h-4 w-4" />
-              Upload Document
+              {t('healthDocument.uploadButton')}
             </>
           )}
         </Button>

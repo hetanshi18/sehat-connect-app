@@ -189,6 +189,18 @@ const translations: Record<Language, any> = {
       backToSymptoms: 'Back to Symptoms',
       uploadDocuments: 'Upload Health Documents'
     },
+    healthDocument: {
+      upload: 'Upload Health Document',
+      uploadDesc: 'Upload medical reports, prescriptions, or other health documents',
+      title: 'Document Title',
+      titlePlaceholder: 'e.g., Blood Test Report - Jan 2024',
+      selectFile: 'Select File',
+      uploadButton: 'Upload Document',
+      uploading: 'Uploading...',
+      success: 'Document uploaded successfully!',
+      error: 'Please select a file and enter a title',
+      noFile: 'No file chosen'
+    },
     howItWorks: {
       title: 'How It Works',
       saveTimeTitle: 'Save Time',
@@ -399,6 +411,18 @@ const translations: Record<Language, any> = {
       backToSymptoms: 'लक्षणों पर वापस जाएं',
       uploadDocuments: 'स्वास्थ्य दस्तावेज़ अपलोड करें'
     },
+    healthDocument: {
+      upload: 'स्वास्थ्य दस्तावेज़ अपलोड करें',
+      uploadDesc: 'चिकित्सा रिपोर्ट, नुस्खे, या अन्य स्वास्थ्य दस्तावेज़ अपलोड करें',
+      title: 'दस्तावेज़ शीर्षक',
+      titlePlaceholder: 'जैसे, रक्त परीक्षण रिपोर्ट - जनवरी 2024',
+      selectFile: 'फ़ाइल चुनें',
+      uploadButton: 'दस्तावेज़ अपलोड करें',
+      uploading: 'अपलोड हो रहा है...',
+      success: 'दस्तावेज़ सफलतापूर्वक अपलोड किया गया!',
+      error: 'कृपया एक फ़ाइल चुनें और शीर्षक दर्ज करें',
+      noFile: 'कोई फ़ाइल नहीं चुनी गई'
+    },
     howItWorks: {
       title: 'यह कैसे काम करता है',
       saveTimeTitle: 'समय बचाएं',
@@ -608,6 +632,18 @@ const translations: Record<Language, any> = {
       downloadReport: 'अहवाल डाउनलोड करा',
       backToSymptoms: 'लक्षणांवर परत जा',
       uploadDocuments: 'आरोग्य दस्तऐवज अपलोड करा'
+    },
+    healthDocument: {
+      upload: 'आरोग्य दस्तऐवज अपलोड करा',
+      uploadDesc: 'वैद्यकीय अहवाल, प्रिस्क्रिप्शन किंवा इतर आरोग्य दस्तऐवज अपलोड करा',
+      title: 'दस्तऐवज शीर्षक',
+      titlePlaceholder: 'उदा., रक्त चाचणी अहवाल - जानेवारी 2024',
+      selectFile: 'फाइल निवडा',
+      uploadButton: 'दस्तऐवज अपलोड करा',
+      uploading: 'अपलोड होत आहे...',
+      success: 'दस्तऐवज यशस्वीरित्या अपलोड केले!',
+      error: 'कृपया फाइल निवडा आणि शीर्षक प्रविष्ट करा',
+      noFile: 'कोणतीही फाइल निवडली नाही'
     },
     howItWorks: {
       title: 'हे कसे कार्य करते',

@@ -58,29 +58,29 @@ const Appointments = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge className="bg-yellow-500">Awaiting Doctor Approval</Badge>;
+        return <Badge className="bg-yellow-500">{t('appointments.awaitingApproval')}</Badge>;
       case 'confirmed':
-        return <Badge className="bg-green-500">Appointment Confirmed</Badge>;
+        return <Badge className="bg-green-500">{t('appointments.appointmentConfirmed')}</Badge>;
       case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">{t('appointments.rejected')}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
   };
 
   return (
-    <DashboardLayout title="My Appointments">
+    <DashboardLayout title={t('appointments.title')}>
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {t('dashboard.backToDashboard')}
         </Button>
 
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="grid w-full max-w-2xl grid-cols-3">
-            <TabsTrigger value="pending">Pending ({pendingAppointments.length})</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed ({confirmedAppointments.length})</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected ({rejectedAppointments.length})</TabsTrigger>
+            <TabsTrigger value="pending">{t('appointments.pending')} ({pendingAppointments.length})</TabsTrigger>
+            <TabsTrigger value="confirmed">{t('appointments.confirmed')} ({confirmedAppointments.length})</TabsTrigger>
+            <TabsTrigger value="rejected">{t('appointments.rejected')} ({rejectedAppointments.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending" className="mt-6">
@@ -88,7 +88,7 @@ const Appointments = () => {
               {pendingAppointments.length === 0 ? (
                 <Card className="shadow-soft">
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No pending appointments
+                    {t('appointments.noPending')}
                   </CardContent>
                 </Card>
               ) : (
@@ -139,7 +139,7 @@ const Appointments = () => {
               {confirmedAppointments.length === 0 ? (
                 <Card className="shadow-soft">
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No confirmed appointments
+                    {t('appointments.noConfirmed')}
                   </CardContent>
                 </Card>
               ) : (
@@ -193,7 +193,7 @@ const Appointments = () => {
               {rejectedAppointments.length === 0 ? (
                 <Card className="shadow-soft">
                   <CardContent className="py-12 text-center text-muted-foreground">
-                    No rejected appointments
+                    {t('appointments.noRejected')}
                   </CardContent>
                 </Card>
               ) : (

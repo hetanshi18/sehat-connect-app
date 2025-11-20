@@ -219,7 +219,7 @@ const Consult = () => {
                         }}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        Book Appointment
+                        {t('consult.bookAppointment')}
                       </Button>
                     </DialogTrigger>
                     {selectedDoctor === doctor.user_id && (
@@ -231,7 +231,7 @@ const Consult = () => {
                         
                         <div className="space-y-6">
                           <div>
-                            <h4 className="mb-3 font-semibold">Select Date</h4>
+                            <h4 className="mb-3 font-semibold">{t('consult.selectDate')}</h4>
                             <div className="flex justify-center">
                               <CalendarComponent
                                 mode="single"
