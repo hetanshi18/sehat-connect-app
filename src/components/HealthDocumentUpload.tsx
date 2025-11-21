@@ -72,30 +72,61 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
 
       toast({ title: t('common.success'), description: t('healthDocument.success') });
       
-      // Process the document with AI
+      // Process the document with AI using Python backend
       setAnalyzing(true);
       const fileType = ['pdf'].includes(fileExt || '') ? 'pdf' : 'image';
       
-      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('process-medical-report', {
-        body: { fileUrl: publicUrl, fileType }
-      });
+      try {
+        // Read file as base64
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            const base64Data = base64.split(',')[1]; // Remove data:image/png;base64, prefix
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(file);
+        
+        const fileData = await base64Promise;
+        
+        // Call Python backend directly
+        const backendUrl = import.meta.env.VITE_PYTHON_BACKEND_URL || 'http://localhost:8000';
+        const response = await fetch(`${backendUrl}/process-report`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file_data: fileData,
+            file_type: fileType
+          })
+        });
 
-      if (analysisError) {
-        console.error('Analysis error:', analysisError);
+        if (!response.ok) {
+          throw new Error('Analysis failed');
+        }
+
+        const analysisData = await response.json();
+
+        if (analysisData?.analysis) {
+          // Update the record with analysis
+          await supabase
+            .from('health_records')
+            .update({ report: analysisData.analysis })
+            .eq('id', recordId);
+
+          setAnalysis(analysisData.analysis);
+          setShowAnalysis(true);
+        }
+      } catch (error) {
+        console.error('Analysis error:', error);
         toast({ 
           title: t('common.warning') || 'Warning', 
           description: 'Document uploaded but analysis failed. You can try again later.',
           variant: 'destructive' 
         });
-      } else if (analysisData?.success && analysisData?.analysis) {
-        // Update the record with analysis
-        await supabase
-          .from('health_records')
-          .update({ report: analysisData.analysis })
-          .eq('id', recordId);
-
-        setAnalysis(analysisData.analysis);
-        setShowAnalysis(true);
       }
 
       setTitle('');
