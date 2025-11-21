@@ -7,7 +7,8 @@ from app.ocr_processor import process_medical_report
 import base64
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "*", "methods": ["GET", "POST", "OPTIONS"]}})
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 @app.route("/predict", methods=["POST"])
 def predict():
