@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, FileText, Loader2, X } from 'lucide-react';
+import { Upload, FileText, Loader2, X, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ReportAnalysisDialog } from './ReportAnalysisDialog';
 
 interface HealthDocumentUploadProps {
   onUploadComplete?: () => void;
@@ -19,6 +20,9 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [analysis, setAnalysis] = useState<string>('');
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -33,9 +37,11 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
     }
 
     setUploading(true);
+    let recordId = '';
+    
     try {
       // Upload file to storage
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
@@ -50,18 +56,48 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
         .getPublicUrl(fileName);
 
       // Create health record entry
-      const { error: dbError } = await supabase
+      const { data: recordData, error: dbError } = await supabase
         .from('health_records')
         .insert({
           patient_id: user.id,
           title,
           type: 'report',
           file_url: publicUrl
-        });
+        })
+        .select()
+        .single();
 
       if (dbError) throw dbError;
+      recordId = recordData.id;
 
       toast({ title: t('common.success'), description: t('healthDocument.success') });
+      
+      // Process the document with AI
+      setAnalyzing(true);
+      const fileType = ['pdf'].includes(fileExt || '') ? 'pdf' : 'image';
+      
+      const { data: analysisData, error: analysisError } = await supabase.functions.invoke('process-medical-report', {
+        body: { fileUrl: publicUrl, fileType }
+      });
+
+      if (analysisError) {
+        console.error('Analysis error:', analysisError);
+        toast({ 
+          title: t('common.warning') || 'Warning', 
+          description: 'Document uploaded but analysis failed. You can try again later.',
+          variant: 'destructive' 
+        });
+      } else if (analysisData?.success && analysisData?.analysis) {
+        // Update the record with analysis
+        await supabase
+          .from('health_records')
+          .update({ report: analysisData.analysis })
+          .eq('id', recordId);
+
+        setAnalysis(analysisData.analysis);
+        setShowAnalysis(true);
+      }
+
       setTitle('');
       setFile(null);
       if (onUploadComplete) onUploadComplete();
@@ -69,6 +105,7 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
       toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } finally {
       setUploading(false);
+      setAnalyzing(false);
     }
   };
 
@@ -119,13 +156,20 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
 
         <Button 
           onClick={handleUpload} 
-          disabled={uploading || !file || !title}
+          disabled={uploading || analyzing || !file || !title}
           className="w-full"
         >
-          {uploading ? (
+          {uploading || analyzing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('healthDocument.uploading')}
+              {analyzing ? (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {t('healthDocument.analyzing') || 'Analyzing with AI...'}
+                </>
+              ) : (
+                t('healthDocument.uploading')
+              )}
             </>
           ) : (
             <>
@@ -135,6 +179,13 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
           )}
         </Button>
       </CardContent>
+
+      <ReportAnalysisDialog
+        open={showAnalysis}
+        onOpenChange={setShowAnalysis}
+        analysis={analysis}
+        title={title || 'Medical Report'}
+      />
     </Card>
   );
 };
