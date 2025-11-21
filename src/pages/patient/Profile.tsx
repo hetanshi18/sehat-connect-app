@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { EditProfileDialog } from '@/components/EditProfileDialog';
 import { HealthDocumentUpload } from '@/components/HealthDocumentUpload';
+import { ReportAnalysisDialog } from '@/components/ReportAnalysisDialog';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const PatientProfile = () => {
@@ -16,6 +17,8 @@ const PatientProfile = () => {
   const { t } = useLanguage();
   const [patientInfo, setPatientInfo] = useState<any>(null);
   const [healthRecords, setHealthRecords] = useState<any[]>([]);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [showReportDialog, setShowReportDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -148,12 +151,38 @@ const PatientProfile = () => {
                     </div>
                     <div>
                       <p className="font-medium">{report.title}</p>
-                      <p className="text-sm text-muted-foreground">{report.date}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(report.created_at).toLocaleDateString()}
+                      </p>
+                      {report.report && (
+                        <p className="text-xs text-primary mt-1">✨ AI Analysis Available</p>
+                      )}
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" aria-label="Download report">
-                    <Download className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    {report.report && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedReport(report);
+                          setShowReportDialog(true);
+                        }}
+                      >
+                        View Analysis
+                      </Button>
+                    )}
+                    {report.file_url && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        aria-label="Download report"
+                        onClick={() => window.open(report.file_url, '_blank')}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -188,6 +217,13 @@ const PatientProfile = () => {
           </CardContent>
         </Card>
       </div>
+
+      <ReportAnalysisDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        analysis={selectedReport?.report || ''}
+        title={selectedReport?.title || 'Medical Report'}
+      />
     </DashboardLayout>
   );
 };
