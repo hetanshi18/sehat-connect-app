@@ -5,6 +5,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Clock, Shield, Users, Video } from "lucide-react";
 import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
+import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -312,51 +314,76 @@ const Index = () => {
       </section>
 
       {/* How It Works */}
-      <section className="relative py-20 overflow-hidden">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10" />
-        
-        {/* Decorative Circles */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
-        
+      <section className="relative py-20 overflow-hidden bg-muted/30">
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-xl text-muted-foreground">Get started in three simple steps</p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center space-y-4 group">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
-                1
-              </div>
-              <h3 className="text-xl font-semibold">Record Symptoms</h3>
-              <p className="text-muted-foreground">
-                Use our kiosk or app to record your symptoms and health concerns
-              </p>
-            </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <SpotlightCard>
+                <div className="space-y-4">
+                  <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
+                    Step 1
+                  </div>
+                  <h3 className="text-2xl font-semibold">Record Symptoms</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Use our kiosk or app to record your symptoms and health concerns with our AI-powered analysis
+                  </p>
+                </div>
+              </SpotlightCard>
+            </motion.div>
 
-            <div className="text-center space-y-4 group">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
-                2
-              </div>
-              <h3 className="text-xl font-semibold">Book Consultation</h3>
-              <p className="text-muted-foreground">
-                Choose from available specialists and book your appointment
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <SpotlightCard>
+                <div className="space-y-4">
+                  <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
+                    Step 2
+                  </div>
+                  <h3 className="text-2xl font-semibold">Book Consultation</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Choose from available specialists and book your appointment at a time that works for you
+                  </p>
+                </div>
+              </SpotlightCard>
+            </motion.div>
 
-            <div className="text-center space-y-4 group">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
-                3
-              </div>
-              <h3 className="text-xl font-semibold">Get Treatment</h3>
-              <p className="text-muted-foreground">
-                Connect with your doctor and receive personalized care
-              </p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <SpotlightCard>
+                <div className="space-y-4">
+                  <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
+                    Step 3
+                  </div>
+                  <h3 className="text-2xl font-semibold">Get Treatment</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Connect with your doctor via video call and receive personalized care and treatment plans
+                  </p>
+                </div>
+              </SpotlightCard>
+            </motion.div>
           </div>
         </div>
       </section>
