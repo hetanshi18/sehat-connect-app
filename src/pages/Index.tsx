@@ -236,7 +236,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   1
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -251,7 +251,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   2
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -266,7 +266,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   3
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -281,7 +281,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute right-1 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   4
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
