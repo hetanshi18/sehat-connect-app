@@ -74,34 +74,16 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
       
       // Process the document with AI using Python backend
       setAnalyzing(true);
-      const fileType = ['pdf'].includes(fileExt || '') ? 'pdf' : 'image';
       
       try {
-        // Read file as base64
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onloadend = () => {
-            const base64 = reader.result as string;
-            const base64Data = base64.split(',')[1]; // Remove data:image/png;base64, prefix
-            resolve(base64Data);
-          };
-          reader.onerror = reject;
-        });
-        reader.readAsDataURL(file);
-        
-        const fileData = await base64Promise;
-        
-        // Call Python backend directly
+        // Call Python backend with FormData
         const backendUrl = import.meta.env.VITE_PYTHON_BACKEND_URL || 'http://localhost:8000';
-        const response = await fetch(`${backendUrl}/process-report`, {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`${backendUrl}/ocr`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            file_data: fileData,
-            file_type: fileType
-          })
+          body: formData
         });
 
         if (!response.ok) {
