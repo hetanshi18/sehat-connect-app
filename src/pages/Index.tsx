@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Heart, Clock, Shield, Users, Video } from "lucide-react";
+import { Heart, Clock, Shield, Users, Video, Activity, Calendar, TrendingUp } from "lucide-react";
 import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
@@ -234,81 +234,65 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
-              <CardContent className="pt-6 pb-8 space-y-3">
-                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+            <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
+              <div className="space-y-3">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   1
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
-                  <Lottie
-                    animationData={videoAnimation}
-                    loop={true}
-                    style={{ width: 36, height: 36 }}
-                  />
+                  <Video className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.videoConsult.title')}</h3>
                 <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.videoConsult.description')}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </SpotlightCard>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
-              <CardContent className="pt-6 pb-8 space-y-3">
-                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+            <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
+              <div className="space-y-3">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   2
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
-                  <Lottie
-                    animationData={documentAnimation}
-                    loop={true}
-                    style={{ width: 36, height: 36 }}
-                  />
+                  <Activity className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.symptomAnalysis.title')}</h3>
                 <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.symptomAnalysis.description')}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </SpotlightCard>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
-              <CardContent className="pt-6 pb-8 space-y-3">
-                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+            <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
+              <div className="space-y-3">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   3
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
-                  <Lottie
-                    animationData={calendarAnimation}
-                    loop={true}
-                    style={{ width: 36, height: 36 }}
-                  />
+                  <Calendar className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.easyScheduling.title')}</h3>
                 <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.easyScheduling.description')}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </SpotlightCard>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
-              <CardContent className="pt-6 pb-8 space-y-3">
-                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+            <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
+              <div className="space-y-3">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   4
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
-                  <Lottie
-                    animationData={trendAnimation}
-                    loop={true}
-                    style={{ width: 36, height: 36 }}
-                  />
+                  <TrendingUp className="h-7 w-7 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.healthTracking.title')}</h3>
                 <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.healthTracking.description')}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </SpotlightCard>
           </div>
         </div>
       </section>
