@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Heart, Video, Calendar, TrendingUp, FileText, Clock, Shield, Users } from "lucide-react";
+import { Heart, Clock, Shield, Users, Video } from "lucide-react";
 import HeroSection from "@/components/ui/hero-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import Lottie from "lottie-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -11,6 +12,205 @@ const Index = () => {
 
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Lottie animation data for healthcare features
+  const videoAnimation = {
+    v: "5.7.4",
+    fr: 30,
+    ip: 0,
+    op: 60,
+    w: 100,
+    h: 100,
+    nm: "Video Camera",
+    ddd: 0,
+    assets: [],
+    layers: [
+      {
+        ddd: 0,
+        ind: 1,
+        ty: 4,
+        nm: "Camera",
+        sr: 1,
+        ks: {
+          o: { a: 1, k: [{ t: 0, s: [100] }, { t: 30, s: [60] }, { t: 60, s: [100] }] },
+          p: { a: 0, k: [50, 50] },
+          s: { a: 1, k: [{ t: 0, s: [100, 100] }, { t: 30, s: [95, 95] }, { t: 60, s: [100, 100] }] }
+        },
+        shapes: [
+          {
+            ty: "gr",
+            it: [
+              {
+                ty: "rc",
+                d: 1,
+                s: { a: 0, k: [50, 35] },
+                p: { a: 0, k: [0, 0] },
+                r: { a: 0, k: 5 }
+              },
+              {
+                ty: "fl",
+                c: { a: 0, k: [0.3, 0.6, 1, 1] },
+                o: { a: 0, k: 100 }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  const documentAnimation = {
+    v: "5.7.4",
+    fr: 30,
+    ip: 0,
+    op: 90,
+    w: 100,
+    h: 100,
+    nm: "Medical Document",
+    ddd: 0,
+    assets: [],
+    layers: [
+      {
+        ddd: 0,
+        ind: 1,
+        ty: 4,
+        nm: "Pulse Line",
+        sr: 1,
+        ks: {
+          o: { a: 0, k: 100 },
+          p: { a: 0, k: [50, 50] }
+        },
+        shapes: [
+          {
+            ty: "gr",
+            it: [
+              {
+                ty: "sh",
+                d: 1,
+                ks: {
+                  a: 1,
+                  k: [
+                    {
+                      t: 0,
+                      s: [{ i: [[0, 0]], o: [[0, 0]], v: [[-25, 0], [-15, 0], [-10, -10], [-5, 10], [0, 0], [25, 0]] }]
+                    },
+                    {
+                      t: 45,
+                      s: [{ i: [[0, 0]], o: [[0, 0]], v: [[-25, 0], [-15, 2], [-10, -8], [-5, 12], [0, 0], [25, 0]] }]
+                    },
+                    {
+                      t: 90,
+                      s: [{ i: [[0, 0]], o: [[0, 0]], v: [[-25, 0], [-15, 0], [-10, -10], [-5, 10], [0, 0], [25, 0]] }]
+                    }
+                  ]
+                }
+              },
+              {
+                ty: "st",
+                c: { a: 0, k: [0.3, 0.6, 1, 1] },
+                o: { a: 0, k: 100 },
+                w: { a: 0, k: 3 }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  const calendarAnimation = {
+    v: "5.7.4",
+    fr: 30,
+    ip: 0,
+    op: 120,
+    w: 100,
+    h: 100,
+    nm: "Calendar",
+    ddd: 0,
+    assets: [],
+    layers: [
+      {
+        ddd: 0,
+        ind: 1,
+        ty: 4,
+        nm: "Calendar Page",
+        sr: 1,
+        ks: {
+          o: { a: 0, k: 100 },
+          p: { a: 1, k: [{ t: 0, s: [50, 50] }, { t: 60, s: [50, 48] }, { t: 120, s: [50, 50] }] }
+        },
+        shapes: [
+          {
+            ty: "gr",
+            it: [
+              {
+                ty: "rc",
+                d: 1,
+                s: { a: 0, k: [50, 50] },
+                p: { a: 0, k: [0, 0] },
+                r: { a: 0, k: 8 }
+              },
+              {
+                ty: "fl",
+                c: { a: 0, k: [0.3, 0.6, 1, 1] },
+                o: { a: 0, k: 100 }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  const trendAnimation = {
+    v: "5.7.4",
+    fr: 30,
+    ip: 0,
+    op: 90,
+    w: 100,
+    h: 100,
+    nm: "Trend Line",
+    ddd: 0,
+    assets: [],
+    layers: [
+      {
+        ddd: 0,
+        ind: 1,
+        ty: 4,
+        nm: "Arrow",
+        sr: 1,
+        ks: {
+          o: { a: 0, k: 100 },
+          p: { a: 1, k: [{ t: 0, s: [50, 55] }, { t: 45, s: [50, 45] }, { t: 90, s: [50, 55] }] }
+        },
+        shapes: [
+          {
+            ty: "gr",
+            it: [
+              {
+                ty: "sh",
+                d: 1,
+                ks: {
+                  a: 0,
+                  k: {
+                    i: [[0, 0]],
+                    o: [[0, 0]],
+                    v: [[-20, 10], [0, -10], [20, 5]]
+                  }
+                }
+              },
+              {
+                ty: "st",
+                c: { a: 0, k: [0.3, 0.6, 1, 1] },
+                o: { a: 0, k: 100 },
+                w: { a: 0, k: 3 }
+              }
+            ]
+          }
+        ]
+      }
+    ]
   };
 
   return (
@@ -32,61 +232,77 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
-              <CardContent className="pt-6 space-y-3">
-                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
+              <CardContent className="pt-6 pb-8 space-y-3">
+                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   1
                 </div>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
-                  <Video className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
+                  <Lottie
+                    animationData={videoAnimation}
+                    loop={true}
+                    style={{ width: 36, height: 36 }}
+                  />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.videoConsult.title')}</h3>
-                <p className="text-muted-foreground relative z-10">
+                <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.videoConsult.description')}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
-              <CardContent className="pt-6 space-y-3">
-                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
+              <CardContent className="pt-6 pb-8 space-y-3">
+                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   2
                 </div>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
-                  <FileText className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
+                  <Lottie
+                    animationData={documentAnimation}
+                    loop={true}
+                    style={{ width: 36, height: 36 }}
+                  />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.symptomAnalysis.title')}</h3>
-                <p className="text-muted-foreground relative z-10">
+                <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.symptomAnalysis.description')}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
-              <CardContent className="pt-6 space-y-3">
-                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
+              <CardContent className="pt-6 pb-8 space-y-3">
+                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   3
                 </div>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
-                  <Calendar className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
+                  <Lottie
+                    animationData={calendarAnimation}
+                    loop={true}
+                    style={{ width: 36, height: 36 }}
+                  />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.easyScheduling.title')}</h3>
-                <p className="text-muted-foreground relative z-10">
+                <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.easyScheduling.description')}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="relative border-2 hover:border-primary transition-all duration-300 hover:-translate-y-3 hover:shadow-xl group overflow-hidden">
-              <CardContent className="pt-6 space-y-3">
-                <div className="absolute bottom-4 left-4 text-6xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+            <Card className="relative border-2 hover:border-primary transition-all duration-200 hover:-translate-y-1.5 hover:shadow-2xl hover:scale-[1.02] group overflow-hidden">
+              <CardContent className="pt-6 pb-8 space-y-3">
+                <div className="absolute bottom-3 right-3 text-[80px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   4
                 </div>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/20 transition-colors">
-                  <TrendingUp className="h-6 w-6 text-primary" />
+                <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
+                  <Lottie
+                    animationData={trendAnimation}
+                    loop={true}
+                    style={{ width: 36, height: 36 }}
+                  />
                 </div>
                 <h3 className="text-xl font-semibold relative z-10">{t('features.healthTracking.title')}</h3>
-                <p className="text-muted-foreground relative z-10">
+                <p className="text-muted-foreground relative z-10 text-sm leading-relaxed">
                   {t('features.healthTracking.description')}
                 </p>
               </CardContent>
