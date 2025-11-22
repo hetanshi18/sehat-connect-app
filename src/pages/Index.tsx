@@ -7,7 +7,6 @@ import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { motion } from "framer-motion";
-import GooeyNav from "@/components/ui/GooeyNav";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -233,29 +232,11 @@ const Index = () => {
               {t('features.subtitle')}
             </p>
           </div>
-
-          <div style={{ height: '200px', position: 'relative', marginBottom: '3rem' }}>
-            <GooeyNav
-              items={[
-                { label: "Video Consultations", href: "#video" },
-                { label: "Symptom Analysis", href: "#symptoms" },
-                { label: "Easy Scheduling", href: "#scheduling" },
-                { label: "Health Tracking", href: "#tracking" },
-              ]}
-              particleCount={15}
-              particleDistances={[90, 10]}
-              particleR={100}
-              initialActiveIndex={0}
-              animationTime={600}
-              timeVariance={300}
-              colors={[1, 2, 3, 1, 2, 3, 1, 4]}
-            />
-          </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   1
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -270,7 +251,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   2
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -285,7 +266,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute right-3 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   3
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -300,7 +281,7 @@ const Index = () => {
 
             <SpotlightCard className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.04]">
               <div className="space-y-3">
-                <div className="absolute right-1 text-[40px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
+                <div className="absolute bottom-3 right-3 text-[60px] font-bold text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none select-none leading-none">
                   4
                 </div>
                 <div className="h-14 w-14 rounded-lg bg-primary/10 flex items-center justify-center relative z-10 group-hover:bg-primary/15 transition-all">
@@ -329,23 +310,6 @@ const Index = () => {
             <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-xl text-muted-foreground">Get started in three simple steps</p>
           </motion.div>
-
-          <div style={{ height: '200px', position: 'relative', marginBottom: '3rem' }}>
-            <GooeyNav
-              items={[
-                { label: "Record Symptoms", href: "#record" },
-                { label: "Book Consultation", href: "#book" },
-                { label: "Get Treatment", href: "#treatment" },
-              ]}
-              particleCount={15}
-              particleDistances={[90, 10]}
-              particleR={100}
-              initialActiveIndex={0}
-              animationTime={600}
-              timeVariance={300}
-              colors={[1, 2, 3, 1, 2, 3, 1, 4]}
-            />
-          </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <motion.div
@@ -468,23 +432,6 @@ const Index = () => {
               <p className="text-xl text-primary-foreground/90 max-w-2xl mx-auto">
                 {t('cta.subtitle')}
               </p>
-
-              <div style={{ height: '180px', position: 'relative', marginBottom: '2rem' }}>
-                <GooeyNav
-                  items={[
-                    { label: "Start Your Journey", href: "/auth" },
-                    { label: "Learn More", href: "#features" },
-                  ]}
-                  particleCount={12}
-                  particleDistances={[90, 10]}
-                  particleR={100}
-                  initialActiveIndex={0}
-                  animationTime={600}
-                  timeVariance={300}
-                  colors={[1, 2, 3, 1, 2, 3]}
-                />
-              </div>
-
               <Button 
                 size="lg" 
                 variant="secondary"
