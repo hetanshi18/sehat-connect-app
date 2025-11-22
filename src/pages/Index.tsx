@@ -5,7 +5,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Clock, Shield, Users, Video } from "lucide-react";
 import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
-import { WavyBackground } from "@/components/ui/wavy-background";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -313,62 +312,54 @@ const Index = () => {
       </section>
 
       {/* How It Works */}
-      <WavyBackground 
-        className="py-20"
-        containerClassName="relative"
-        colors={[
-          "hsl(217, 91%, 90%)",
-          "hsl(271, 76%, 90%)",
-          "hsl(346, 77%, 92%)",
-          "hsl(217, 91%, 80%)",
-          "hsl(271, 76%, 80%)",
-        ]}
-        waveWidth={40}
-        blur={8}
-        speed="slow"
-        waveOpacity={0.3}
-      >
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
-              <p className="text-xl text-muted-foreground">Get started in three simple steps</p>
+      <section className="relative py-20 overflow-hidden">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10" />
+        
+        {/* Decorative Circles */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
+            <p className="text-xl text-muted-foreground">Get started in three simple steps</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="text-center space-y-4 group">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
+                1
+              </div>
+              <h3 className="text-xl font-semibold">Record Symptoms</h3>
+              <p className="text-muted-foreground">
+                Use our kiosk or app to record your symptoms and health concerns
+              </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center space-y-4">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
-                  1
-                </div>
-                <h3 className="text-xl font-semibold">Record Symptoms</h3>
-                <p className="text-muted-foreground">
-                  Use our kiosk or app to record your symptoms and health concerns
-                </p>
+            <div className="text-center space-y-4 group">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
+                2
               </div>
+              <h3 className="text-xl font-semibold">Book Consultation</h3>
+              <p className="text-muted-foreground">
+                Choose from available specialists and book your appointment
+              </p>
+            </div>
 
-              <div className="text-center space-y-4">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
-                  2
-                </div>
-                <h3 className="text-xl font-semibold">Book Consultation</h3>
-                <p className="text-muted-foreground">
-                  Choose from available specialists and book your appointment
-                </p>
+            <div className="text-center space-y-4 group">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20 group-hover:shadow-lg">
+                3
               </div>
-
-              <div className="text-center space-y-4">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto text-2xl font-bold text-primary">
-                  3
-                </div>
-                <h3 className="text-xl font-semibold">Get Treatment</h3>
-                <p className="text-muted-foreground">
-                  Connect with your doctor and receive personalized care
-                </p>
-              </div>
+              <h3 className="text-xl font-semibold">Get Treatment</h3>
+              <p className="text-muted-foreground">
+                Connect with your doctor and receive personalized care
+              </p>
             </div>
           </div>
-        </section>
-      </WavyBackground>
+        </div>
+      </section>
 
       {/* Benefits Section */}
       <section className="bg-muted/50 py-20">
