@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Heart, Clock, Shield, Users, Video } from "lucide-react";
-import HeroSection from "@/components/ui/hero-section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Heart, Clock, Shield, Users, Video } from "lucide-react";
 import Lottie from "lottie-react";
+import HeroSection from "@/components/ui/hero-section";
 
 const Index = () => {
   const navigate = useNavigate();
