@@ -59,21 +59,11 @@ export const GeneratePrescriptionDialog = ({ appointmentId, onSuccess }: Generat
 
     setIsGenerating(true);
     try {
-      // Get current session to ensure we have a valid token
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session) {
-        throw new Error('You must be logged in to generate prescriptions');
-      }
-
       const { data, error } = await supabase.functions.invoke('generate-prescription', {
         body: {
           appointmentId,
           diagnosis,
           medicines: validMedicines,
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
         },
       });
 

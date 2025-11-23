@@ -25,19 +25,8 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-
-    // Get user
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) {
-      throw new Error('Unauthorized');
-    }
 
     const { appointmentId, diagnosis, medicines }: PrescriptionRequest = await req.json();
 
@@ -274,7 +263,7 @@ serve(async (req) => {
     // Convert HTML to PDF using a third-party service or return HTML
     // For now, we'll create the prescription record with HTML content
     const fileName = `prescription_${appointmentId}_${Date.now()}.html`;
-    const filePath = `${user.id}/${fileName}`;
+    const filePath = `${appointment.doctor_id}/${fileName}`;
 
     // Upload HTML as file to storage
     const { error: uploadError } = await supabaseClient.storage
