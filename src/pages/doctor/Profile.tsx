@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, User, Mail, Briefcase, GraduationCap, MapPin, Award, Edit } from 'lucide-react';
+import { ArrowLeft, User, Mail, Briefcase, GraduationCap, MapPin, Award, Edit, Upload, FileSignature, IdCard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +27,10 @@ const DoctorProfile = () => {
     clinicAddress: '',
     about: '',
     achievements: '',
+    registrationNumber: '',
+    signatureUrl: '',
   });
+  const [uploadingSignature, setUploadingSignature] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -67,6 +70,8 @@ const DoctorProfile = () => {
         clinicAddress: doctorData?.clinic_address || '',
         about: doctorData?.about || '',
         achievements: doctorData?.achievements?.join(', ') || '',
+        registrationNumber: doctorData?.registration_number || '',
+        signatureUrl: doctorData?.signature_url || '',
       });
     } catch (error: any) {
       console.error('Error fetching doctor info:', error);
@@ -114,6 +119,8 @@ const DoctorProfile = () => {
           clinic_address: formData.clinicAddress,
           about: formData.about,
           achievements: achievementsArray.length > 0 ? achievementsArray : null,
+          registration_number: formData.registrationNumber,
+          signature_url: formData.signatureUrl,
         }, {
           onConflict: 'user_id'
         });
@@ -137,6 +144,56 @@ const DoctorProfile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files || event.target.files.length === 0) return;
+
+    const file = event.target.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Error', description: 'Please upload an image file', variant: 'destructive' });
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: 'Error', description: 'File size should be less than 2MB', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingSignature(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `signature/${user.id}/signature.${fileExt}`;
+
+      // Delete old signature if exists
+      if (formData.signatureUrl) {
+        const oldPath = formData.signatureUrl.split('/').slice(-3).join('/');
+        await supabase.storage.from('health-documents').remove([oldPath]);
+      }
+
+      // Upload new signature
+      const { error: uploadError } = await supabase.storage
+        .from('health-documents')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('health-documents')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, signatureUrl: urlData.publicUrl });
+      toast({ title: 'Success', description: 'Signature uploaded successfully' });
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setUploadingSignature(false);
     }
   };
 
@@ -264,6 +321,92 @@ const DoctorProfile = () => {
                 onChange={(e) => setFormData({ ...formData, clinicAddress: e.target.value })}
                 disabled={!isEditing}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Registration & Signature */}
+        <Card className="mt-6 shadow-soft">
+          <CardHeader>
+            <CardTitle>Medical Registration & Signature</CardTitle>
+            <CardDescription>Required for generating valid prescriptions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="registrationNumber" className="flex items-center gap-2">
+                  <IdCard className="h-4 w-4 text-muted-foreground" />
+                  Medical Registration Number
+                </Label>
+                <Input
+                  id="registrationNumber"
+                  value={formData.registrationNumber}
+                  onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                  disabled={!isEditing}
+                  placeholder="Enter your registration number"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <FileSignature className="h-4 w-4 text-muted-foreground" />
+                E-Signature
+              </Label>
+              <div className="flex items-center gap-4">
+                {formData.signatureUrl ? (
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src={formData.signatureUrl} 
+                      alt="Doctor's signature" 
+                      className="h-20 border rounded p-2 bg-background"
+                    />
+                    {isEditing && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('signature-upload')?.click()}
+                        disabled={uploadingSignature}
+                      >
+                        {uploadingSignature ? (
+                          <>Uploading...</>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Change Signature
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById('signature-upload')?.click()}
+                    disabled={!isEditing || uploadingSignature}
+                  >
+                    {uploadingSignature ? (
+                      <>Uploading...</>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Signature
+                      </>
+                    )}
+                  </Button>
+                )}
+                <input
+                  id="signature-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleSignatureUpload}
+                  disabled={!isEditing}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Upload a clear image of your signature (PNG, JPG, max 2MB)
+              </p>
             </div>
           </CardContent>
         </Card>

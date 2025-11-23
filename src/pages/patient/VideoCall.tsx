@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Mic, MicOff, Video, VideoOff, PhoneOff, FileText, ClipboardList, Pill, Loader2, Save } from 'lucide-react';
+import { GeneratePrescriptionDialog } from '@/components/GeneratePrescriptionDialog';
 import { useTwilioVideo } from '@/hooks/useTwilioVideo';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -326,19 +327,18 @@ const VideoCall = () => {
                   </TabsContent>
                   
                   <TabsContent value="prescription" className="space-y-3">
-                    <div>
-                      <Label className="text-sm font-medium mb-2">Medicines Prescribed</Label>
-                      <Textarea
-                        placeholder={userRole === 'doctor' ? "List medicines and dosage..." : "Prescription will be shared after consultation"}
-                        rows={4}
-                        value={medicines}
-                        onChange={(e) => setMedicines(e.target.value)}
-                        disabled={userRole !== 'doctor'}
-                        className="resize-none mt-2"
-                      />
-                    </div>
-                    {userRole === 'doctor' && (
+                    {userRole === 'doctor' ? (
                       <>
+                        <div>
+                          <Label className="text-sm font-medium mb-2">Quick Notes (Optional)</Label>
+                          <Textarea
+                            placeholder="Add quick prescription notes..."
+                            rows={3}
+                            value={medicines}
+                            onChange={(e) => setMedicines(e.target.value)}
+                            className="resize-none mt-2"
+                          />
+                        </div>
                         <div>
                           <Label className="text-sm font-medium mb-2">Follow-up Date</Label>
                           <Input
@@ -351,6 +351,7 @@ const VideoCall = () => {
                         <Button 
                           onClick={saveNotes} 
                           disabled={isSaving}
+                          variant="outline"
                           className="w-full"
                         >
                           {isSaving ? (
@@ -361,11 +362,27 @@ const VideoCall = () => {
                           ) : (
                             <>
                               <Save className="mr-2 h-4 w-4" />
-                              Save Prescription
+                              Save Quick Notes
                             </>
                           )}
                         </Button>
+                        <div className="pt-2 border-t">
+                          <GeneratePrescriptionDialog 
+                            appointmentId={appointmentId}
+                            onSuccess={() => {
+                              toast({
+                                title: 'Prescription Ready',
+                                description: 'Patient can now download the prescription',
+                              });
+                            }}
+                          />
+                        </div>
                       </>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Prescription will be shared after consultation</p>
+                      </div>
                     )}
                   </TabsContent>
                 </Tabs>

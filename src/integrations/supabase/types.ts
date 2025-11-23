@@ -137,6 +137,8 @@ export type Database = {
           experience: number | null
           id: string
           qualification: string | null
+          registration_number: string | null
+          signature_url: string | null
           specialty: string | null
           updated_at: string
           user_id: string
@@ -149,6 +151,8 @@ export type Database = {
           experience?: number | null
           id?: string
           qualification?: string | null
+          registration_number?: string | null
+          signature_url?: string | null
           specialty?: string | null
           updated_at?: string
           user_id: string
@@ -161,6 +165,8 @@ export type Database = {
           experience?: number | null
           id?: string
           qualification?: string | null
+          registration_number?: string | null
+          signature_url?: string | null
           specialty?: string | null
           updated_at?: string
           user_id?: string
@@ -269,6 +275,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      prescriptions: {
+        Row: {
+          appointment_id: string
+          created_at: string | null
+          diagnosis: string | null
+          doctor_id: string
+          id: string
+          medicines: Json
+          patient_id: string
+          prescription_date: string | null
+          prescription_url: string
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_id: string
+          id?: string
+          medicines: Json
+          patient_id: string
+          prescription_date?: string | null
+          prescription_url: string
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_id?: string
+          id?: string
+          medicines?: Json
+          patient_id?: string
+          prescription_date?: string | null
+          prescription_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
