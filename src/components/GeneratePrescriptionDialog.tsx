@@ -126,10 +126,6 @@ export const GeneratePrescriptionDialog = ({ appointmentId, onSuccess }: Generat
                   The prescription has been created and is ready for download
                 </p>
                 <div className="flex gap-2 justify-center">
-                  <Button variant="outline" onClick={() => window.open(generatedUrl, '_blank')}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    View Prescription
-                  </Button>
                   <Button onClick={async () => {
                     try {
                       const prescriptionId = new URL(generatedUrl).searchParams.get('id');
