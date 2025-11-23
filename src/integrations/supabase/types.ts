@@ -372,6 +372,7 @@ export type Database = {
           order_date: string
           patient_id: string
           pickup_location: string | null
+          prescription_file_path: string | null
           prescription_id: string | null
           status: string
           total_amount: number
@@ -385,6 +386,7 @@ export type Database = {
           order_date?: string
           patient_id: string
           pickup_location?: string | null
+          prescription_file_path?: string | null
           prescription_id?: string | null
           status?: string
           total_amount: number
@@ -398,6 +400,7 @@ export type Database = {
           order_date?: string
           patient_id?: string
           pickup_location?: string | null
+          prescription_file_path?: string | null
           prescription_id?: string | null
           status?: string
           total_amount?: number

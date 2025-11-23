@@ -12,8 +12,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
 import { Medicine, CartItem } from '@/types/pharmacy';
-import { ShoppingCart, Plus, Minus, Trash2, Search, Pill, Package, Upload, X } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, Pill, Package, Upload, X, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+
+interface Prescription {
+  id: string;
+  prescription_date: string;
+  diagnosis: string | null;
+  medicines: any;
+}
 
 export default function PharmacyKiosk() {
   const navigate = useNavigate();
@@ -31,14 +38,36 @@ export default function PharmacyKiosk() {
   const [submitting, setSubmitting] = useState(false);
   const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [prescriptionType, setPrescriptionType] = useState<'upload' | 'portal'>('upload');
+  const [portalPrescriptions, setPortalPrescriptions] = useState<Prescription[]>([]);
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<string>('');
 
   useEffect(() => {
     fetchMedicines();
+    fetchPortalPrescriptions();
   }, []);
 
   useEffect(() => {
     filterMedicines();
   }, [searchTerm, categoryFilter, medicines]);
+
+  const fetchPortalPrescriptions = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .select('id, prescription_date, diagnosis, medicines')
+        .eq('patient_id', user.id)
+        .order('prescription_date', { ascending: false });
+
+      if (error) throw error;
+      setPortalPrescriptions((data || []) as Prescription[]);
+    } catch (error) {
+      console.error('Error fetching prescriptions:', error);
+    }
+  };
 
   const fetchMedicines = async () => {
     try {
@@ -189,21 +218,32 @@ export default function PharmacyKiosk() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      let prescriptionFilePath = null;
       let prescriptionId = null;
 
-      // Upload prescription if provided
-      if (prescriptionFile) {
-        setUploading(true);
-        const fileExt = prescriptionFile.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('prescriptions')
-          .upload(fileName, prescriptionFile);
+      // Handle prescription based on type
+      if (hasPrescriptionRequired()) {
+        if (prescriptionType === 'upload') {
+          if (!prescriptionFile) {
+            throw new Error('Please upload a prescription');
+          }
+          setUploading(true);
+          const fileExt = prescriptionFile.name.split('.').pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('prescriptions')
+            .upload(fileName, prescriptionFile);
 
-        if (uploadError) throw uploadError;
-        prescriptionId = fileName;
-        setUploading(false);
+          if (uploadError) throw uploadError;
+          prescriptionFilePath = fileName;
+          setUploading(false);
+        } else if (prescriptionType === 'portal') {
+          if (!selectedPrescriptionId) {
+            throw new Error('Please select a prescription');
+          }
+          prescriptionId = selectedPrescriptionId;
+        }
       }
 
       // Create order
@@ -217,6 +257,7 @@ export default function PharmacyKiosk() {
           pickup_location: deliveryType === 'pickup' ? pickupLocation : null,
           status: 'pending',
           prescription_id: prescriptionId,
+          prescription_file_path: prescriptionFilePath,
         })
         .select()
         .single();
@@ -244,6 +285,7 @@ export default function PharmacyKiosk() {
 
       setCart([]);
       setPrescriptionFile(null);
+      setSelectedPrescriptionId('');
       setShowCheckout(false);
       navigate('/dashboard');
     } catch (error: any) {
@@ -469,40 +511,78 @@ export default function PharmacyKiosk() {
                 </div>
 
                 {hasPrescriptionRequired() && (
-                  <div className="space-y-3 pt-4 border-t">
-                    <Label className="text-sm font-medium">Prescription Upload (Required)</Label>
+                  <div className="space-y-4 pt-4 border-t">
+                    <Label className="text-sm font-medium">Prescription (Required)</Label>
                     <p className="text-xs text-muted-foreground">Some medicines in your cart require a prescription</p>
                     
-                    {!prescriptionFile ? (
-                      <div className="flex items-center gap-2">
-                        <Button type="button" variant="outline" onClick={() => document.getElementById('prescription-upload')?.click()}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Prescription
-                        </Button>
-                        <input
-                          id="prescription-upload"
-                          type="file"
-                          accept="image/jpeg,image/png,image/jpg,application/pdf"
-                          className="hidden"
-                          onChange={handlePrescriptionUpload}
-                        />
+                    <RadioGroup value={prescriptionType} onValueChange={(v: any) => setPrescriptionType(v)}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="upload" id="upload" />
+                        <Label htmlFor="upload">Upload Prescription File</Label>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2 p-2 border rounded-lg">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{prescriptionFile.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {(prescriptionFile.size / 1024).toFixed(0)} KB
-                          </p>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="portal" id="portal" />
+                        <Label htmlFor="portal">Select Portal Prescription</Label>
+                      </div>
+                    </RadioGroup>
+
+                    {prescriptionType === 'upload' ? (
+                      !prescriptionFile ? (
+                        <div className="flex items-center gap-2">
+                          <Button type="button" variant="outline" onClick={() => document.getElementById('prescription-upload')?.click()}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Prescription
+                          </Button>
+                          <input
+                            id="prescription-upload"
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg,application/pdf"
+                            className="hidden"
+                            onChange={handlePrescriptionUpload}
+                          />
                         </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setPrescriptionFile(null)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-2 p-2 border rounded-lg">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{prescriptionFile.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(prescriptionFile.size / 1024).toFixed(0)} KB
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setPrescriptionFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="portal-prescription">Select Prescription</Label>
+                        <Select value={selectedPrescriptionId} onValueChange={setSelectedPrescriptionId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a prescription" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {portalPrescriptions.length === 0 ? (
+                              <div className="p-2 text-sm text-muted-foreground">No prescriptions available</div>
+                            ) : (
+                              portalPrescriptions.map((rx) => (
+                                <SelectItem key={rx.id} value={rx.id}>
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4" />
+                                    <span>
+                                      {new Date(rx.prescription_date).toLocaleDateString()} - {rx.diagnosis || 'Prescription'}
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
                   </div>
@@ -517,7 +597,13 @@ export default function PharmacyKiosk() {
             </Button>
             <Button 
               onClick={handleCheckout} 
-              disabled={cart.length === 0 || submitting || uploading || (hasPrescriptionRequired() && !prescriptionFile)}
+              disabled={
+                cart.length === 0 || 
+                submitting || 
+                uploading || 
+                (hasPrescriptionRequired() && prescriptionType === 'upload' && !prescriptionFile) ||
+                (hasPrescriptionRequired() && prescriptionType === 'portal' && !selectedPrescriptionId)
+              }
             >
               {uploading ? 'Uploading...' : submitting ? 'Placing Order...' : 'Place Order'}
             </Button>
