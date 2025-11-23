@@ -291,17 +291,6 @@ const Appointments = () => {
                               <div className="flex gap-2">
                                 <Button 
                                   size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    const viewUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${prescription.id}`;
-                                    window.open(viewUrl, '_blank');
-                                  }}
-                                >
-                                  <FileText className="mr-2 h-4 w-4" />
-                                  View
-                                </Button>
-                                <Button 
-                                  size="sm"
                                   onClick={async () => {
                                     try {
                                       await downloadPrescriptionAsPDF(prescription.id, apt.profiles?.name || 'prescription');

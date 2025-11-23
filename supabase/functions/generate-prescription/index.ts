@@ -150,6 +150,8 @@ serve(async (req) => {
             max-width: 200px;
             height: auto;
             margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
           }
           .footer {
             margin-top: 40px;
@@ -175,7 +177,7 @@ serve(async (req) => {
             <p>${doctorInfo.specialty || ''}</p>
             ${doctorInfo.registration_number ? `<p>Reg. No: ${doctorInfo.registration_number}</p>` : ''}
             <p>${doctorInfo.clinic_address || ''}</p>
-            <p>Phone: ${appointment.doctor.phone || appointment.doctor.email}</p>
+            ${appointment.doctor.phone ? `<p>Phone: ${appointment.doctor.phone}</p>` : ''}
           </div>
         </div>
 
@@ -243,7 +245,7 @@ serve(async (req) => {
 
         <div class="signature-section">
           ${doctorInfo.signature_url ? `
-            <img src="${doctorInfo.signature_url}" alt="Doctor's Signature" class="signature-image" />
+            <img src="${doctorInfo.signature_url}" alt="Doctor's Signature" class="signature-image" crossorigin="anonymous" />
           ` : `
             <div style="height: 60px; margin-bottom: 10px;"></div>
           `}
