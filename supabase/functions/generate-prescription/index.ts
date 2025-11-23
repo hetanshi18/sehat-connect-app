@@ -71,12 +71,16 @@ serve(async (req) => {
       <html>
       <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+          * {
+            box-sizing: border-box;
+          }
           body {
             font-family: 'Arial', sans-serif;
-            max-width: 800px;
+            max-width: 750px;
             margin: 0 auto;
-            padding: 40px;
+            padding: 30px 20px;
             line-height: 1.6;
           }
           .header {
@@ -245,7 +249,7 @@ serve(async (req) => {
 
         <div class="signature-section">
           ${doctorInfo.signature_url ? `
-            <img src="${doctorInfo.signature_url}" alt="Doctor's Signature" class="signature-image" crossorigin="anonymous" />
+            <img src="${doctorInfo.signature_url}?t=${Date.now()}" alt="Doctor's Signature" class="signature-image" crossorigin="anonymous" style="display: block; margin-left: auto;" />
           ` : `
             <div style="height: 60px; margin-bottom: 10px;"></div>
           `}

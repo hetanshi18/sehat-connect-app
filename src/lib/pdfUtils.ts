@@ -19,18 +19,23 @@ export async function downloadPrescriptionAsPDF(prescriptionId: string, patientN
     container.innerHTML = html;
     container.style.position = 'absolute';
     container.style.left = '-9999px';
-    container.style.width = '794px'; // A4 width in pixels at 96 DPI
+    container.style.width = '750px'; // Adjusted width for better fit
+    container.style.padding = '0';
+    container.style.margin = '0';
     document.body.appendChild(container);
     
-    // Wait a bit for styles to apply
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for images and styles to load
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Convert HTML to canvas
     const canvas = await html2canvas(container, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       logging: false,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      width: 750,
+      windowWidth: 750
     });
     
     // Remove temporary container
@@ -44,10 +49,25 @@ export async function downloadPrescriptionAsPDF(prescriptionId: string, patientN
       format: 'a4'
     });
     
-    const imgWidth = 210; // A4 width in mm
+    const pageWidth = 210; // A4 width in mm
+    const pageHeight = 297; // A4 height in mm
+    const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    let heightLeft = imgHeight;
+    let position = 0;
+    
+    // Add first page
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    // Add additional pages if content is longer than one page
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
     
     // Download the PDF
     const fileName = `prescription_${patientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
