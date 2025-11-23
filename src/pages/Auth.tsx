@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Stethoscope, UserCircle, User } from 'lucide-react';
+import { Stethoscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { getUserRole } from '@/lib/auth';
@@ -15,7 +15,6 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 const Auth = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const [role, setRole] = useState<'patient' | 'doctor'>('patient');
   
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', name: '' });
@@ -61,7 +60,7 @@ const Auth = () => {
       options: {
         data: {
           name: signupData.name,
-          role: role
+          role: 'patient'
         },
         emailRedirectTo: `${window.location.origin}/`
       }
@@ -94,25 +93,6 @@ const Auth = () => {
           <CardDescription>{t('auth.subtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex gap-2">
-            <Button
-              variant={role === 'patient' ? 'default' : 'outline'}
-              className="flex-1"
-              onClick={() => setRole('patient')}
-            >
-              <UserCircle className="mr-2 h-4 w-4" />
-              {t('auth.patient')}
-            </Button>
-            <Button
-              variant={role === 'doctor' ? 'default' : 'outline'}
-              className="flex-1"
-              onClick={() => setRole('doctor')}
-            >
-              <User className="mr-2 h-4 w-4" />
-              {t('auth.doctor')}
-            </Button>
-          </div>
-
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">{t('auth.signIn')}</TabsTrigger>

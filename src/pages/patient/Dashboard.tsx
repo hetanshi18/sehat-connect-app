@@ -19,7 +19,6 @@ const PatientDashboard = () => {
     { title: t('dashboard.recordSymptoms'), description: t('dashboard.logSymptoms'), icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
     { title: 'Pharmacy', description: 'Order medicines', icon: FileText, path: '/patient/pharmacy', color: 'bg-secondary' },
     { title: 'My Orders', description: 'View order history', icon: Package, path: '/patient/orders', color: 'bg-accent' },
-    { title: t('dashboard.healthTrends'), description: t('dashboard.viewAnalytics'), icon: TrendingUp, path: '/trends', color: 'bg-primary' },
     { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/profile', color: 'bg-accent' },
   ];
 
