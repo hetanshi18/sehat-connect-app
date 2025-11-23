@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, FileText, Loader2, Download } from 'lucide-react';
+import { Plus, Trash2, FileText, Loader2, Download, FileDown } from 'lucide-react';
+import { downloadPrescriptionAsPDF } from '@/lib/pdfUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -125,9 +126,23 @@ export const GeneratePrescriptionDialog = ({ appointmentId, onSuccess }: Generat
                   The prescription has been created and is ready for download
                 </p>
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={() => window.open(generatedUrl, '_blank')}>
-                    <Download className="mr-2 h-4 w-4" />
+                  <Button variant="outline" onClick={() => window.open(generatedUrl, '_blank')}>
+                    <FileText className="mr-2 h-4 w-4" />
                     View Prescription
+                  </Button>
+                  <Button onClick={async () => {
+                    try {
+                      const prescriptionId = new URL(generatedUrl).searchParams.get('id');
+                      if (prescriptionId) {
+                        await downloadPrescriptionAsPDF(prescriptionId, 'prescription');
+                        toast({ title: 'Success', description: 'Prescription downloaded as PDF successfully' });
+                      }
+                    } catch (error) {
+                      toast({ title: 'Error', description: 'Failed to download prescription', variant: 'destructive' });
+                    }
+                  }}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Download PDF
                   </Button>
                   <Button variant="outline" onClick={handleClose}>
                     Close
