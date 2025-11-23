@@ -148,8 +148,37 @@ Deno.serve(async (req) => {
         doctor: appointment.doctor
       });
 
+      // Validate date format - skip if it's not a valid date
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+      if (!datePattern.test(appointment.date)) {
+        console.error(`✗ Invalid date format for appointment ${appointment.id}: "${appointment.date}". Expected format: YYYY-MM-DD. Skipping...`);
+        remindersSent.push({
+          appointmentId: appointment.id,
+          type: 'error',
+          message: 'Invalid date format',
+          status: 'failed',
+          error: `Date "${appointment.date}" is not in valid format (YYYY-MM-DD). Cannot send reminder.`
+        });
+        continue; // Skip this appointment
+      }
+
       // Parse appointment date and time
-      const appointmentDateTime = new Date(`${appointment.date}T${appointment.time.split(' - ')[0]}`);
+      const timeStart = appointment.time.split(' - ')[0];
+      const appointmentDateTime = new Date(`${appointment.date}T${timeStart}:00`);
+      
+      // Validate the parsed date
+      if (isNaN(appointmentDateTime.getTime())) {
+        console.error(`✗ Could not parse date/time for appointment ${appointment.id}: "${appointment.date}T${timeStart}". Skipping...`);
+        remindersSent.push({
+          appointmentId: appointment.id,
+          type: 'error',
+          message: 'Could not parse date/time',
+          status: 'failed',
+          error: `Failed to parse appointment date/time: ${appointment.date} ${appointment.time}`
+        });
+        continue; // Skip this appointment
+      }
+
       const timeDiff = appointmentDateTime.getTime() - now.getTime();
       const hoursDiff = timeDiff / (1000 * 60 * 60);
 
