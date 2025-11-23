@@ -288,7 +288,7 @@ const ViewAppointments = () => {
   const completedAppointments = appointments.filter(apt => apt.status === 'completed');
 
   return (
-    <DashboardLayout title="View Appointments">
+    <DashboardLayout role="doctor" title="View Appointments">
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/doctor/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />

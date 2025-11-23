@@ -7,10 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  title: string;
+  role: 'patient' | 'doctor' | 'admin';
+  title?: string;
 }
 
-const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, role: userRole, title }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const { user, role } = useAuth();
 
@@ -29,7 +30,9 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Sehat Sathi</h1>
-              <p className="text-xs text-muted-foreground">{role === 'patient' ? 'Patient Portal' : 'Doctor Portal'}</p>
+              <p className="text-xs text-muted-foreground">
+                {userRole === 'patient' ? 'Patient Portal' : userRole === 'doctor' ? 'Doctor Portal' : 'Admin Portal'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -44,7 +47,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
         </div>
       </header>
       <main className="container py-8">
-        <h2 className="mb-6 text-3xl font-bold text-foreground">{title}</h2>
+        {title && <h2 className="mb-6 text-3xl font-bold text-foreground">{title}</h2>}
         {children}
       </main>
     </div>

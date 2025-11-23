@@ -51,7 +51,7 @@ const Chat = () => {
   };
 
   return (
-    <DashboardLayout title={`Chat with ${doctor?.name || 'Doctor'}`}>
+    <DashboardLayout role="patient" title={`Chat with ${doctor?.name || 'Doctor'}`}>
       <div className="max-w-4xl">
         <Button variant="ghost" onClick={() => navigate('/consult')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />

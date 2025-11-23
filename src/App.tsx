@@ -20,6 +20,10 @@ import DoctorProfile from "./pages/doctor/Profile";
 import ManageSlots from "./pages/doctor/ManageSlots";
 import ViewAppointments from "./pages/doctor/ViewAppointments";
 import PatientHistory from "./pages/doctor/PatientHistory";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AddDoctor from "./pages/admin/AddDoctor";
+import ViewDoctors from "./pages/admin/ViewDoctors";
+import ViewPatients from "./pages/admin/ViewPatients";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +111,28 @@ const App = () => {
             <Route path="/doctor/patient-history" element={
               <ProtectedRoute requiredRole="doctor">
                 <PatientHistory />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/add-doctor" element={
+              <ProtectedRoute requiredRole="admin">
+                <AddDoctor />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/doctors" element={
+              <ProtectedRoute requiredRole="admin">
+                <ViewDoctors />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/patients" element={
+              <ProtectedRoute requiredRole="admin">
+                <ViewPatients />
               </ProtectedRoute>
             } />
             

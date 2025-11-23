@@ -200,7 +200,7 @@ const Consult = () => {
   }, [doctors, searchQuery, selectedSpecialty, selectedRating, selectedAvailability]);
 
   return (
-    <DashboardLayout title="Book Doctor Consultation">
+    <DashboardLayout role="patient" title="Book Doctor Consultation">
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />

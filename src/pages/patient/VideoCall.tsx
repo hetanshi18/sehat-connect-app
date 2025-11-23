@@ -167,7 +167,7 @@ const VideoCall = () => {
   };
 
   return (
-    <DashboardLayout title={`Video Call with ${displayName}`}>
+    <DashboardLayout role="patient" title={`Video Call with ${displayName}`}>
       <div className="max-w-7xl">
         <Button 
           variant="ghost" 

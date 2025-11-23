@@ -135,7 +135,7 @@ const ManageSlots = () => {
   }, {} as Record<string, any[]>);
 
   return (
-    <DashboardLayout title="Manage Availability Slots">
+    <DashboardLayout role="doctor" title="Manage Availability Slots">
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/doctor/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />

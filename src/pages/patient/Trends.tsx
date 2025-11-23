@@ -10,7 +10,7 @@ const Trends = () => {
   const navigate = useNavigate();
 
   return (
-    <DashboardLayout title="Health Trends">
+    <DashboardLayout role="patient" title="Health Trends">
       <div className="max-w-6xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
