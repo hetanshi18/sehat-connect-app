@@ -122,6 +122,16 @@ export default {
             transform: "translateY(-4px)",
           },
         },
+        "heartbeat": {
+          "0%, 100%": {
+            transform: "scale(1)",
+            boxShadow: "0 0 0 0 hsl(var(--primary) / 0)",
+          },
+          "50%": {
+            transform: "scale(1.05)",
+            boxShadow: "0 0 30px 8px hsl(var(--primary) / 0.25)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -131,6 +141,7 @@ export default {
         "gentle-pulse": "gentle-pulse 2s ease-in-out infinite",
         "button-glow": "button-glow 2s ease-in-out infinite",
         "card-lift": "card-lift 0.3s ease-out forwards",
+        "heartbeat": "heartbeat 2s ease-in-out infinite",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
