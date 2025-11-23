@@ -1,157 +1,120 @@
-import base64
-from google import genai
+#ocr_processor.py
+import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import traceback
 from PIL import Image
 import io
-import PyPDF2
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Configure Gemini
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    print("ERROR: GEMINI_API_KEY not found!")
+    print("Add GEMINI_API_KEY=your_key to .env file")
+else:
+    genai.configure(api_key=GEMINI_API_KEY)
+
+# Medical report analysis prompt
+ANALYSIS_PROMPT = """
+Analyze this medical/blood test report and provide a comprehensive analysis:
+
+1. **Test Type**: Identify what kind of medical test this is
+
+2. **Key Parameters**: List all test parameters with their values and reference ranges
+
+3. **Abnormal Values**: Highlight any values outside normal range (mark as HIGH or LOW)
+
+4. **Health Insights**: Provide interpretation of the results
+
+5. **Recommendations**: Suggest follow-up actions or lifestyle changes
+
+6. **Risk Assessment**: Identify any potential health concerns
+
+Format clearly with sections and bullet points. Be medically accurate but easy to understand.
+"""
 
 def process_medical_report(file_bytes, file_type):
     """
-    Process medical report (PDF or image) and extract insights using Gemini
-    
-    Args:
-        file_bytes: File content in bytes
-        file_type: 'pdf' or 'image'
-    
-    Returns:
-        dict: Extracted insights and analysis
+    Process medical report (PDF or image) using Gemini
     """
+    if not GEMINI_API_KEY:
+        return {"error": "Gemini API key not configured"}
+    
     try:
+        print(f"Processing {file_type} file...")
+        
+        # Initialize model
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
         if file_type == 'pdf':
-            return process_pdf_report(file_bytes)
-        elif file_type == 'image':
-            return process_image_report(file_bytes)
+            # For PDF, convert to images first
+            try:
+                import fitz  # PyMuPDF
+                
+                # Open PDF from bytes
+                pdf_document = fitz.open(stream=file_bytes, filetype="pdf")
+                
+                # Convert first page to image (you can loop for multi-page)
+                page = pdf_document[0]
+                pix = page.get_pixmap(dpi=300)
+                img_bytes = pix.tobytes("png")
+                
+                # Convert to PIL Image
+                image = Image.open(io.BytesIO(img_bytes))
+                pdf_document.close()
+                
+            except ImportError:
+                return {
+                    "error": "PyMuPDF not installed. Run: pip install PyMuPDF",
+                    "fallback": "Please upload as an image (JPG/PNG) instead"
+                }
         else:
-            return {"error": "Unsupported file type"}
-    except Exception as e:
-        return {"error": f"Processing failed: {str(e)}"}
-
-def process_image_report(image_bytes):
-    """Process image-based medical report"""
-    try:
-        # Convert bytes to base64 for Gemini
-        image = Image.open(io.BytesIO(image_bytes))
+            # For images, directly use PIL
+            image = Image.open(io.BytesIO(file_bytes))
         
-        # Convert to RGB if necessary
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
+        print(f"Sending to Gemini for analysis...")
         
-        # Save to bytes buffer
-        buffer = io.BytesIO()
-        image.save(buffer, format='JPEG')
-        img_data = buffer.getvalue()
+        # Generate content with image
+        response = model.generate_content([ANALYSIS_PROMPT, image])
         
-        # Create prompt for medical report analysis
-        prompt = """
-        Analyze this medical/blood test report image and provide:
-        
-        1. **Test Type**: Identify what kind of medical test this is
-        2. **Key Parameters**: List all test parameters with their values and reference ranges
-        3. **Abnormal Values**: Highlight any values outside normal range (mark as HIGH or LOW)
-        4. **Health Insights**: Provide interpretation of the results
-        5. **Recommendations**: Suggest any follow-up actions or lifestyle changes
-        6. **Risk Assessment**: Identify any potential health concerns
-        
-        Format the response clearly with sections and bullet points.
-        Be specific and medically accurate but use language that's easy to understand.
-        """
-        
-        # Upload the image and get response
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=[
-                prompt,
-                {"mime_type": "image/jpeg", "data": img_data}
-            ]
-        )
+        print("✅ Analysis complete!")
         
         return {
             "success": True,
             "analysis": response.text,
-            "file_type": "image"
+            "file_type": file_type
         }
         
     except Exception as e:
-        return {"error": f"Image processing failed: {str(e)}"}
-
-def process_pdf_report(pdf_bytes):
-    """Process PDF-based medical report"""
-    try:
-        # Extract text from PDF
-        pdf_file = io.BytesIO(pdf_bytes)
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
-        
-        # Extract text from all pages
-        full_text = ""
-        for page in pdf_reader.pages:
-            full_text += page.extract_text() + "\n"
-        
-        # If PDF has images, we can also extract them (optional enhancement)
-        # For now, we'll work with text
-        
-        if not full_text.strip():
-            return {"error": "Could not extract text from PDF. The file might be image-based."}
-        
-        # Create prompt for medical report analysis
-        prompt = f"""
-        Analyze this medical/blood test report and provide:
-        
-        1. **Test Type**: Identify what kind of medical test this is
-        2. **Key Parameters**: List all test parameters with their values and reference ranges
-        3. **Abnormal Values**: Highlight any values outside normal range (mark as HIGH or LOW)
-        4. **Health Insights**: Provide interpretation of the results
-        5. **Recommendations**: Suggest any follow-up actions or lifestyle changes
-        6. **Risk Assessment**: Identify any potential health concerns
-        
-        Format the response clearly with sections and bullet points.
-        Be specific and medically accurate but use language that's easy to understand.
-        
-        MEDICAL REPORT CONTENT:
-        {full_text}
-        """
-        
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=prompt
-        )
-        
+        error_trace = traceback.format_exc()
+        print(f"❌ Error:\n{error_trace}")
         return {
-            "success": True,
-            "analysis": response.text,
-            "extracted_text": full_text[:500] + "..." if len(full_text) > 500 else full_text,
-            "file_type": "pdf"
+            "error": f"Processing failed: {str(e)}",
+            "details": error_trace
         }
-        
-    except Exception as e:
-        return {"error": f"PDF processing failed: {str(e)}"}
 
 def get_specific_insight(report_data, query):
     """
-    Get specific insights from already processed report
-    
-    Args:
-        report_data: Previously extracted report data
-        query: Specific question about the report
+    Ask specific questions about the report
     """
+    if not GEMINI_API_KEY:
+        return {"error": "Gemini API key not configured"}
+    
     try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
         prompt = f"""
-        Based on this medical report data:
+        Based on this medical report:
         {report_data}
         
-        Answer this specific question:
-        {query}
+        Question: {query}
         
-        Provide a clear, concise, and medically accurate answer.
+        Provide a clear, medically accurate answer.
         """
         
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
-            contents=prompt
-        )
+        response = model.generate_content(prompt)
         
         return {
             "success": True,
@@ -159,4 +122,4 @@ def get_specific_insight(report_data, query):
         }
         
     except Exception as e:
-        return {"error": f"Query processing failed: {str(e)}"}
+        return {"error": f"Query failed: {str(e)}"}
