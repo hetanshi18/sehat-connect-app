@@ -291,6 +291,9 @@ serve(async (req) => {
       .from('prescriptions')
       .getPublicUrl(filePath);
 
+    // Generate view URL through edge function
+    const viewUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/view-prescription?id=PLACEHOLDER`;
+
     // Store prescription record
     const { data: prescription, error: prescError } = await supabaseClient
       .from('prescriptions')
@@ -307,11 +310,14 @@ serve(async (req) => {
 
     if (prescError) throw prescError;
 
+    // Update the view URL with actual prescription ID
+    const actualViewUrl = viewUrl.replace('PLACEHOLDER', prescription.id);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         prescription,
-        downloadUrl: urlData.publicUrl
+        downloadUrl: actualViewUrl
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

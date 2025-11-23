@@ -289,7 +289,10 @@ const Appointments = () => {
                               </div>
                               <Button 
                                 size="sm"
-                                onClick={() => window.open(prescription.prescription_url, '_blank')}
+                                onClick={() => {
+                                  const viewUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${prescription.id}`;
+                                  window.open(viewUrl, '_blank');
+                                }}
                               >
                                 <Download className="mr-2 h-4 w-4" />
                                 View
