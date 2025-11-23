@@ -2,3 +2,6 @@ project_id = "qwsfjkaylxykyxaynsgq"
 
 [functions.send-appointment-reminders]
 verify_jwt = false
+
+[functions.generate-prescription]
+verify_jwt = true
