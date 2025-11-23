@@ -6,6 +6,7 @@ import { Heart, Clock, Shield, Users, Video, Activity, Calendar, TrendingUp } fr
 import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { BokehLights } from "@/components/ui/bokeh-lights";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -375,8 +376,8 @@ const Index = () => {
       {/* Benefits Section */}
       <section className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
+            <div className="flex-1 space-y-8 order-2 lg:order-1">
               <div className="flex gap-4">
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Clock className="h-6 w-6 text-primary" />
@@ -414,8 +415,8 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+            <div className="flex-1 relative order-1 lg:order-2 w-full">
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center shadow-medium">
                 <Video className="h-48 w-48 text-primary/40" />
               </div>
             </div>
@@ -424,10 +425,11 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-20 relative">
         <div className="container mx-auto px-4">
-          <Card className="bg-primary text-primary-foreground border-0">
-            <CardContent className="py-12 text-center space-y-6">
+          <Card className="bg-primary text-primary-foreground border-0 relative overflow-hidden">
+            <BokehLights />
+            <CardContent className="py-12 text-center space-y-6 relative z-10">
               <h2 className="text-3xl lg:text-4xl font-bold">{t('cta.title')}</h2>
               <p className="text-xl text-primary-foreground/90 max-w-2xl mx-auto">
                 {t('cta.subtitle')}
@@ -436,7 +438,7 @@ const Index = () => {
                 size="lg" 
                 variant="secondary"
                 onClick={() => navigate("/auth")}
-                className="text-lg px-8"
+                className="text-lg px-8 hover:animate-heartbeat"
               >
                 {t('cta.button')}
               </Button>
