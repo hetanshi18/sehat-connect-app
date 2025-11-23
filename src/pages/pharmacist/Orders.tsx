@@ -209,19 +209,32 @@ export default function Orders() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      {order.prescription_id && (
+                      {(order.prescription_id || (order as any).prescription_file_path) && (
                         <Button
                           size="icon"
                           variant="outline"
-                          asChild
+                          onClick={async () => {
+                            const filePath = (order as any).prescription_file_path;
+                            if (filePath) {
+                              // View uploaded file
+                              window.open(
+                                `https://qwsfjkaylxykyxaynsgq.supabase.co/storage/v1/object/public/prescriptions/${filePath}`,
+                                '_blank'
+                              );
+                            } else if (order.prescription_id) {
+                              // Fetch and view portal prescription
+                              const { data: rxData } = await supabase
+                                .from('prescriptions')
+                                .select('prescription_url')
+                                .eq('id', order.prescription_id)
+                                .single();
+                              if (rxData?.prescription_url) {
+                                window.open(rxData.prescription_url, '_blank');
+                              }
+                            }
+                          }}
                         >
-                          <a 
-                            href={`https://qwsfjkaylxykyxaynsgq.supabase.co/storage/v1/object/public/prescriptions/${order.prescription_id}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                          >
-                            <FileText className="h-4 w-4" />
-                          </a>
+                          <FileText className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
