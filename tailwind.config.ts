@@ -98,21 +98,50 @@ export default {
             transform: "translateX(0)",
           },
         },
+        "gentle-pulse": {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.8",
+          },
+        },
+        "button-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 0 0 hsl(var(--primary) / 0)",
+          },
+          "50%": {
+            boxShadow: "0 0 20px 4px hsl(var(--primary) / 0.3)",
+          },
+        },
+        "card-lift": {
+          from: {
+            transform: "translateY(0)",
+          },
+          to: {
+            transform: "translateY(-4px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
+        "gentle-pulse": "gentle-pulse 2s ease-in-out infinite",
+        "button-glow": "button-glow 2s ease-in-out infinite",
+        "card-lift": "card-lift 0.3s ease-out forwards",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-secondary": "var(--gradient-secondary)",
         "gradient-warm": "var(--gradient-warm)",
+        "gradient-soft-medical": "var(--gradient-soft-medical)",
       },
       boxShadow: {
         "soft": "var(--shadow-soft)",
         "medium": "var(--shadow-medium)",
+        "glow": "var(--shadow-glow)",
       },
     },
   },
