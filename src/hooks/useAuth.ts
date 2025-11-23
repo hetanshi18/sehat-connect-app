@@ -6,7 +6,7 @@ import { getUserRole } from '@/lib/auth';
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<'patient' | 'doctor' | 'admin' | null>(null);
+  const [role, setRole] = useState<'patient' | 'doctor' | 'admin' | 'pharmacist' | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

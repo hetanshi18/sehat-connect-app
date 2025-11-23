@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: 'patient' | 'doctor' | 'admin';
+  role: 'patient' | 'doctor' | 'admin' | 'pharmacist';
   title?: string;
 }
 
@@ -31,7 +31,7 @@ const DashboardLayout = ({ children, role: userRole, title }: DashboardLayoutPro
             <div>
               <h1 className="text-xl font-bold text-foreground">Sehat Sathi</h1>
               <p className="text-xs text-muted-foreground">
-                {userRole === 'patient' ? 'Patient Portal' : userRole === 'doctor' ? 'Doctor Portal' : 'Admin Portal'}
+                {userRole === 'patient' ? 'Patient Portal' : userRole === 'doctor' ? 'Doctor Portal' : userRole === 'pharmacist' ? 'Pharmacist Portal' : 'Admin Portal'}
               </p>
             </div>
           </div>

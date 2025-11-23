@@ -17,6 +17,7 @@ const PatientDashboard = () => {
     { title: t('dashboard.myAppointments'), description: t('dashboard.viewScheduled'), icon: Calendar, path: '/appointments', color: 'bg-gradient-primary' },
     { title: t('dashboard.bookConsultation'), description: t('dashboard.scheduleDoctor'), icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
     { title: t('dashboard.recordSymptoms'), description: t('dashboard.logSymptoms'), icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
+    { title: 'Pharmacy', description: 'Order medicines', icon: FileText, path: '/patient/pharmacy', color: 'bg-secondary' },
     { title: t('dashboard.healthTrends'), description: t('dashboard.viewAnalytics'), icon: TrendingUp, path: '/trends', color: 'bg-primary' },
     { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/profile', color: 'bg-accent' },
   ];
