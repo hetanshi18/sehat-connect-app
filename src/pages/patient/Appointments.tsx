@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Clock, User, Stethoscope } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ const Appointments = () => {
   const { t } = useLanguage();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [prescriptions, setPrescriptions] = useState<Record<string, any>>({});
 
   useEffect(() => {
     if (user) {
@@ -45,7 +46,7 @@ const Appointments = () => {
       if (error) throw error;
       setAppointments(data || []);
 
-      // Fetch notes for completed appointments
+      // Fetch notes and prescriptions for completed appointments
       if (data) {
         const completedIds = data.filter(apt => apt.status === 'completed').map(apt => apt.id);
         if (completedIds.length > 0) {
@@ -60,6 +61,20 @@ const Appointments = () => {
               return acc;
             }, {} as Record<string, any>);
             setAppointmentNotes(notesMap);
+          }
+
+          // Fetch prescriptions
+          const { data: prescData, error: prescError } = await supabase
+            .from('prescriptions')
+            .select('*')
+            .in('appointment_id', completedIds);
+
+          if (!prescError && prescData) {
+            const prescMap = prescData.reduce((acc, presc) => {
+              acc[presc.appointment_id] = presc;
+              return acc;
+            }, {} as Record<string, any>);
+            setPrescriptions(prescMap);
           }
         }
       }
@@ -224,6 +239,7 @@ const Appointments = () => {
               ) : (
                 completedAppointments.map((apt) => {
                   const notes = appointmentNotes[apt.id];
+                  const prescription = prescriptions[apt.id];
                   return (
                     <Card key={apt.id} className="shadow-soft hover:shadow-medium transition-all">
                       <CardHeader>
@@ -256,6 +272,31 @@ const Appointments = () => {
                             <span>{apt.time}</span>
                           </div>
                         </div>
+                        
+                        {prescription && (
+                          <div className="mt-4 border-t pt-4">
+                            <div className="flex items-center justify-between rounded-lg bg-primary/5 p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                  <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold">Prescription Available</h4>
+                                  <p className="text-xs text-muted-foreground">
+                                    Generated on {new Date(prescription.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button 
+                                size="sm"
+                                onClick={() => window.open(prescription.prescription_url, '_blank')}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                View
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                         
                         {notes && (
                           <div className="mt-4 space-y-3 border-t pt-4">
