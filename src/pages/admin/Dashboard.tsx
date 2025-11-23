@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, UserCog, Calendar, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, UserCog, Calendar, Activity, Plus, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalPatients: 0,
     totalDoctors: 0,
@@ -98,6 +101,62 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.completedAppointments}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/add-doctor')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-primary" />
+                Add New Doctor
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Create a new doctor account with default credentials
+              </p>
+              <Button className="w-full">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Doctor
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/doctors')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-primary" />
+                View All Doctors
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage and view all registered doctors
+              </p>
+              <Button variant="outline" className="w-full">
+                <Eye className="h-4 w-4 mr-2" />
+                View Doctors ({stats.totalDoctors})
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/admin/patients')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-primary" />
+                View All Patients
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                View all registered patients in the system
+              </p>
+              <Button variant="outline" className="w-full">
+                <Eye className="h-4 w-4 mr-2" />
+                View Patients ({stats.totalPatients})
+              </Button>
             </CardContent>
           </Card>
         </div>
