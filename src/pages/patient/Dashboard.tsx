@@ -18,7 +18,6 @@ const PatientDashboard = () => {
     { title: t('dashboard.bookConsultation'), description: t('dashboard.scheduleDoctor'), icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
     { title: t('dashboard.recordSymptoms'), description: t('dashboard.logSymptoms'), icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
     { title: t('dashboard.healthTrends'), description: t('dashboard.viewAnalytics'), icon: TrendingUp, path: '/trends', color: 'bg-primary' },
-    { title: 'Medical Records', description: 'View prescriptions & notes', icon: FileText, path: '/appointments', color: 'bg-gradient-accent' },
     { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/profile', color: 'bg-accent' },
   ];
 
@@ -70,7 +69,7 @@ const PatientDashboard = () => {
         {/* Main Menu */}
         <div>
           <h3 className="mb-4 text-xl font-semibold text-foreground">{t('dashboard.quickActions')}</h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {menuItems.map((item) => {
               const Icon = item.icon;
               return (
