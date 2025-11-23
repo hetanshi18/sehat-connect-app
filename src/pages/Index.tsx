@@ -308,8 +308,8 @@ const Index = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-muted-foreground">Get started in three simple steps</p>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('howItWorks.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t('howItWorks.subtitle')}</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -324,9 +324,9 @@ const Index = () => {
                   <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
                     Step 1
                   </div>
-                  <h3 className="text-2xl font-semibold">Record Symptoms</h3>
+                  <h3 className="text-2xl font-semibold">{t('howItWorks.step1Title')}</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Use our kiosk or app to record your symptoms and health concerns with our AI-powered analysis
+                    {t('howItWorks.step1Desc')}
                   </p>
                 </div>
               </SpotlightCard>
@@ -343,9 +343,9 @@ const Index = () => {
                   <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
                     Step 2
                   </div>
-                  <h3 className="text-2xl font-semibold">Book Consultation</h3>
+                  <h3 className="text-2xl font-semibold">{t('howItWorks.step2Title')}</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Choose from available specialists and book your appointment at a time that works for you
+                    {t('howItWorks.step2Desc')}
                   </p>
                 </div>
               </SpotlightCard>
@@ -362,9 +362,9 @@ const Index = () => {
                   <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-r from-primary/80 to-primary text-primary-foreground text-sm font-semibold">
                     Step 3
                   </div>
-                  <h3 className="text-2xl font-semibold">Get Treatment</h3>
+                  <h3 className="text-2xl font-semibold">{t('howItWorks.step3Title')}</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Connect with your doctor via video call and receive personalized care and treatment plans
+                    {t('howItWorks.step3Desc')}
                   </p>
                 </div>
               </SpotlightCard>

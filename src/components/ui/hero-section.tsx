@@ -110,7 +110,7 @@ const HeroNavbar = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const { t } = useLanguage();
   
   return (
-    <nav className="flex w-full items-center justify-between border-t border-b border-border px-4 py-4">
+    <nav className="relative z-20 flex w-full items-center justify-between border-t border-b border-border px-4 py-4">
       <div className="flex items-center gap-2">
         <Heart className="h-6 w-6 text-primary" />
         <h1 className="text-base font-bold md:text-2xl">Sehat Sathi</h1>
