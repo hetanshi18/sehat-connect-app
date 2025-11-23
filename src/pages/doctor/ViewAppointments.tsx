@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Clock, User, FileText, Check, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft, Calendar, Clock, User, FileText, Check, X, Pill, Stethoscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -15,6 +18,12 @@ const ViewAppointments = () => {
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPatientHistory, setShowPatientHistory] = useState(false);
+  const [showConsultationDetails, setShowConsultationDetails] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [patientHistory, setPatientHistory] = useState<any[]>([]);
+  const [consultationDetails, setConsultationDetails] = useState<any>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -135,6 +144,92 @@ const ViewAppointments = () => {
       fetchAppointments();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const fetchPatientHistory = async (patientId: string, patientInfo: any) => {
+    setHistoryLoading(true);
+    setSelectedPatient(patientInfo);
+    setShowPatientHistory(true);
+
+    try {
+      // Fetch all appointments for this patient
+      const { data: appointments, error: aptError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('doctor_id', user?.id)
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+
+      if (aptError) throw aptError;
+
+      // Fetch appointment notes
+      const { data: notes, error: notesError } = await supabase
+        .from('appointment_notes')
+        .select('*')
+        .eq('patient_id', patientId)
+        .eq('doctor_id', user?.id);
+
+      if (notesError) throw notesError;
+
+      // Fetch health records
+      const { data: healthRecords, error: recordsError } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+
+      // Combine appointment data with notes
+      const history = appointments?.map(apt => {
+        const note = notes?.find(n => n.appointment_id === apt.id);
+        return {
+          ...apt,
+          doctor_notes: note?.notes,
+          medicines_prescribed: note?.medicines_prescribed,
+          follow_up_date: note?.follow_up_date
+        };
+      }) || [];
+
+      setPatientHistory(history);
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const fetchConsultationDetails = async (appointmentId: string, patientInfo: any) => {
+    setHistoryLoading(true);
+    setSelectedPatient(patientInfo);
+    setShowConsultationDetails(true);
+
+    try {
+      // Fetch appointment details
+      const { data: appointment, error: aptError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('id', appointmentId)
+        .single();
+
+      if (aptError) throw aptError;
+
+      // Fetch appointment notes
+      const { data: note, error: noteError } = await supabase
+        .from('appointment_notes')
+        .select('*')
+        .eq('appointment_id', appointmentId)
+        .maybeSingle();
+
+      setConsultationDetails({
+        ...appointment,
+        doctor_notes: note?.notes,
+        medicines_prescribed: note?.medicines_prescribed,
+        follow_up_date: note?.follow_up_date
+      });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -290,7 +385,13 @@ const ViewAppointments = () => {
                         >
                           Start Consultation
                         </Button>
-                        <Button variant="outline" className="flex-1">View Patient History</Button>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => fetchPatientHistory(apt.patient_id, apt.profiles)}
+                        >
+                          View Patient History
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -349,7 +450,11 @@ const ViewAppointments = () => {
                         </div>
                       )}
 
-                      <Button variant="outline" className="w-full">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => fetchConsultationDetails(apt.id, apt.profiles)}
+                      >
                         <FileText className="mr-2 h-4 w-4" />
                         View Consultation Details
                       </Button>
@@ -360,6 +465,201 @@ const ViewAppointments = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Patient History Dialog */}
+        <Dialog open={showPatientHistory} onOpenChange={setShowPatientHistory}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Patient History - {selectedPatient?.name}</DialogTitle>
+              <DialogDescription>
+                Complete medical history and appointment records
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[60vh] pr-4">
+              {historyLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : patientHistory.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No history found</div>
+              ) : (
+                <div className="space-y-4">
+                  {patientHistory.map((apt) => (
+                    <Card key={apt.id} className="border-l-4 border-l-primary">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            {apt.date} at {apt.time}
+                          </CardTitle>
+                          <Badge className={apt.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'}>
+                            {apt.status}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {apt.symptoms && apt.symptoms.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium mb-2">Symptoms:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {apt.symptoms.map((symptom: string, idx: number) => (
+                                <Badge key={idx} variant="secondary">{symptom}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {apt.notes && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Patient Notes:</p>
+                            <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                              {apt.notes}
+                            </p>
+                          </div>
+                        )}
+
+                        {apt.doctor_notes && (
+                          <>
+                            <Separator />
+                            <div>
+                              <p className="text-sm font-medium mb-1 flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4" />
+                                Doctor's Notes:
+                              </p>
+                              <p className="text-sm text-muted-foreground bg-primary/5 p-3 rounded-md">
+                                {apt.doctor_notes}
+                              </p>
+                            </div>
+                          </>
+                        )}
+
+                        {apt.medicines_prescribed && (
+                          <div>
+                            <p className="text-sm font-medium mb-1 flex items-center gap-2">
+                              <Pill className="h-4 w-4" />
+                              Medicines Prescribed:
+                            </p>
+                            <p className="text-sm text-muted-foreground bg-secondary/5 p-3 rounded-md">
+                              {apt.medicines_prescribed}
+                            </p>
+                          </div>
+                        )}
+
+                        {apt.follow_up_date && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Follow-up Date:</span>
+                            <span>{new Date(apt.follow_up_date).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Consultation Details Dialog */}
+        <Dialog open={showConsultationDetails} onOpenChange={setShowConsultationDetails}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Consultation Details</DialogTitle>
+              <DialogDescription>
+                {selectedPatient?.name} - {consultationDetails?.date}
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-4">
+              {historyLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : consultationDetails ? (
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Appointment Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Date:</span>
+                          <span>{consultationDetails.date}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Time:</span>
+                          <span>{consultationDetails.time}</span>
+                        </div>
+                      </div>
+
+                      {consultationDetails.symptoms && consultationDetails.symptoms.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium mb-2">Symptoms:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {consultationDetails.symptoms.map((symptom: string, idx: number) => (
+                              <Badge key={idx} variant="secondary">{symptom}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {consultationDetails.notes && (
+                        <div>
+                          <p className="text-sm font-medium mb-1">Patient Notes:</p>
+                          <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                            {consultationDetails.notes}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {(consultationDetails.doctor_notes || consultationDetails.medicines_prescribed || consultationDetails.follow_up_date) && (
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Stethoscope className="h-4 w-4" />
+                          Consultation Notes
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {consultationDetails.doctor_notes && (
+                          <div>
+                            <p className="text-sm font-medium mb-1">Doctor's Notes:</p>
+                            <p className="text-sm text-muted-foreground bg-primary/5 p-3 rounded-md">
+                              {consultationDetails.doctor_notes}
+                            </p>
+                          </div>
+                        )}
+
+                        {consultationDetails.medicines_prescribed && (
+                          <div>
+                            <p className="text-sm font-medium mb-1 flex items-center gap-2">
+                              <Pill className="h-4 w-4" />
+                              Medicines Prescribed:
+                            </p>
+                            <p className="text-sm text-muted-foreground bg-secondary/5 p-3 rounded-md">
+                              {consultationDetails.medicines_prescribed}
+                            </p>
+                          </div>
+                        )}
+
+                        {consultationDetails.follow_up_date && (
+                          <div className="flex items-center gap-2 text-sm bg-accent/5 p-3 rounded-md">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Follow-up Date:</span>
+                            <span>{new Date(consultationDetails.follow_up_date).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">No details found</div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
