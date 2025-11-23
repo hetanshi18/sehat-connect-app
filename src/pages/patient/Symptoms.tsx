@@ -142,40 +142,22 @@ This is a preliminary report. Please consult with a healthcare professional for 
                 </div>
               )}
 
-              {backendResults && (
-                <>
-                  {backendResults.disease_info?.predictions?.length > 0 && (
-                    <div className="bg-amber-50 dark:bg-amber-950 p-4 rounded-lg border-l-4 border-amber-600">
-                      <h3 className="font-semibold mb-2 flex items-center gap-2 text-amber-900 dark:text-amber-100">
-                        <AlertCircle className="h-5 w-5" />
-                        Predicted Conditions
-                      </h3>
-                      <ul className="space-y-2 text-sm">
-                        {backendResults.disease_info.predictions.slice(0, 3).map((pred: any, idx: number) => (
-                          <li key={idx} className="text-amber-800 dark:text-amber-200">
-                            • {pred.disease} ({(pred.probability * 100).toFixed(1)}% probability)
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {backendResults.medicines?.length > 0 && (
-                    <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border-l-4 border-green-600">
-                      <h3 className="font-semibold mb-2 flex items-center gap-2 text-green-900 dark:text-green-100">
-                        💊 Recommended Medicines
-                      </h3>
-                      <ul className="space-y-2 text-sm">
-                        {backendResults.medicines.map((med: string, idx: number) => (
-                          <li key={idx} className="text-green-800 dark:text-green-200">• {med}</li>
-                        ))}
-                      </ul>
-                      <p className="text-xs text-green-700 dark:text-green-300 mt-3 italic">
-                        Based on predicted condition: {backendResults.matched_disease_for_meds}
-                      </p>
-                    </div>
-                  )}
-                </>
+              {backendResults?.medicines?.length > 0 && (
+                <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border-l-4 border-green-600">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 text-green-900 dark:text-green-100">
+                    💊 Recommended Medicines
+                  </h3>
+                  <ul className="space-y-2 text-sm">
+                    {backendResults.medicines.map((med: string, idx: number) => (
+                      <li key={idx} className="text-green-800 dark:text-green-200">• {med}</li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 pt-3 border-t border-green-200 dark:border-green-800">
+                    <p className="text-xs text-green-700 dark:text-green-300 font-semibold">
+                      ⚠️ DISCLAIMER: Medicines are for symptom relief only. Not a cure. We are not liable—consult a doctor.
+                    </p>
+                  </div>
+                </div>
               )}
               
               <div className="bg-accent/10 p-4 rounded-lg border-l-4 border-accent">
