@@ -214,23 +214,26 @@ export default function Orders() {
                           size="icon"
                           variant="outline"
                           onClick={async () => {
-                            const filePath = (order as any).prescription_file_path;
-                            if (filePath) {
-                              // View uploaded file
-                              window.open(
-                                `https://qwsfjkaylxykyxaynsgq.supabase.co/storage/v1/object/public/prescriptions/${filePath}`,
-                                '_blank'
-                              );
-                            } else if (order.prescription_id) {
-                              // Fetch and view portal prescription
-                              const { data: rxData } = await supabase
-                                .from('prescriptions')
-                                .select('prescription_url')
-                                .eq('id', order.prescription_id)
-                                .single();
-                              if (rxData?.prescription_url) {
-                                window.open(rxData.prescription_url, '_blank');
+                            try {
+                              const filePath = (order as any).prescription_file_path;
+                              if (filePath) {
+                                // View uploaded file from public bucket
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('prescriptions')
+                                  .getPublicUrl(filePath);
+                                window.open(publicUrl, '_blank');
+                              } else if (order.prescription_id) {
+                                // View portal prescription using edge function
+                                const functionUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${order.prescription_id}`;
+                                window.open(functionUrl, '_blank');
                               }
+                            } catch (error: any) {
+                              console.error('Error viewing prescription:', error);
+                              toast({
+                                title: 'Error',
+                                description: 'Failed to load prescription',
+                                variant: 'destructive',
+                              });
                             }
                           }}
                         >
