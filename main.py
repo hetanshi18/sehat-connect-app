@@ -1,11 +1,9 @@
-#main.py
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from app.pipeline import health_assistant_pipeline
 from app.ocr_processor import process_medical_report, get_specific_insight
 from werkzeug.utils import secure_filename
 import os
-import traceback
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
@@ -38,21 +36,21 @@ def ocr():
     """
     Upload medical report (PDF or image) for OCR and analysis
     """
+    # Check if file is present in request
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({
+            "error": "Invalid file type. Allowed types: PDF, PNG, JPG, JPEG"
+        }), 400
+    
     try:
-        # Check if file is present in request
-        if 'file' not in request.files:
-            return jsonify({"error": "No file uploaded"}), 400
-        
-        file = request.files['file']
-        
-        if file.filename == '':
-            return jsonify({"error": "No file selected"}), 400
-        
-        if not allowed_file(file.filename):
-            return jsonify({
-                "error": "Invalid file type. Allowed types: PDF, PNG, JPG, JPEG"
-            }), 400
-        
         # Read file bytes
         file_bytes = file.read()
         
@@ -65,25 +63,16 @@ def ocr():
         else:
             file_type = 'image'
         
-        print(f"Processing {file_type} file: {filename}")
-        
         # Process the medical report
         result = process_medical_report(file_bytes, file_type)
         
         if "error" in result:
-            print(f"Processing error: {result['error']}")
             return jsonify(result), 500
         
         return jsonify(result), 200
         
     except Exception as e:
-        # Print full traceback for debugging
-        error_trace = traceback.format_exc()
-        print(f"OCR endpoint error:\n{error_trace}")
-        return jsonify({
-            "error": f"Processing failed: {str(e)}",
-            "details": error_trace if app.debug else None
-        }), 500
+        return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
 @app.route("/ask-report", methods=["POST"])
 def ask_report():

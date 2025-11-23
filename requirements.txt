@@ -1,7 +1,7 @@
 # Core
 numpy==1.26.4
 pandas==2.2.2
-
+scikit-learn==1.4.2
 joblib==1.4.2
 
 # ML Models & NLP
@@ -30,7 +30,3 @@ flask-cors==4.0.0
 
 # Utility
 protobuf==4.25.3
-google-genai==0.2.2
-Pillow==10.1.0
-PyPDF2==3.0.1
-werkzeug==3.0.1

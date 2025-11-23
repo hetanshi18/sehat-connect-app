@@ -7,7 +7,6 @@ import Lottie from "lottie-react";
 import HeroSection from "@/components/ui/hero-section";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { BokehLights } from "@/components/ui/bokeh-lights";
-import { MedicalBlobIllustration } from "@/components/ui/medical-blob-illustration";
 import { motion } from "framer-motion";
 
 const Index = () => {
@@ -417,7 +416,9 @@ const Index = () => {
             </div>
 
             <div className="flex-1 relative order-1 lg:order-2 w-full">
-              <MedicalBlobIllustration />
+              <div className="aspect-square rounded-2xl bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center shadow-medium">
+                <Video className="h-48 w-48 text-primary/40" />
+              </div>
             </div>
           </div>
         </div>
