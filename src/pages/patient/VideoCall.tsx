@@ -138,7 +138,29 @@ const VideoCall = () => {
     }
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
+    try {
+      // Mark appointment as completed
+      const { error } = await supabase
+        .from('appointments')
+        .update({ status: 'completed' })
+        .eq('id', appointmentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Call Ended",
+        description: "Appointment marked as complete.",
+      });
+    } catch (error: any) {
+      console.error('Error marking appointment complete:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update appointment status.",
+        variant: "destructive",
+      });
+    }
+    
     disconnectFromRoom();
     navigate(userRole === 'doctor' ? '/doctor/view-appointments' : '/appointments');
   };

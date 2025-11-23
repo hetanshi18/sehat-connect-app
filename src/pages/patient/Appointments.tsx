@@ -44,6 +44,25 @@ const Appointments = () => {
 
       if (error) throw error;
       setAppointments(data || []);
+
+      // Fetch notes for completed appointments
+      if (data) {
+        const completedIds = data.filter(apt => apt.status === 'completed').map(apt => apt.id);
+        if (completedIds.length > 0) {
+          const { data: notesData, error: notesError } = await supabase
+            .from('appointment_notes')
+            .select('*')
+            .in('appointment_id', completedIds);
+
+          if (!notesError && notesData) {
+            const notesMap = notesData.reduce((acc, note) => {
+              acc[note.appointment_id] = note;
+              return acc;
+            }, {} as Record<string, any>);
+            setAppointmentNotes(notesMap);
+          }
+        }
+      }
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -51,8 +70,11 @@ const Appointments = () => {
     }
   };
 
+  const [appointmentNotes, setAppointmentNotes] = useState<Record<string, any>>({});
+
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
   const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
+  const completedAppointments = appointments.filter(apt => apt.status === 'completed');
   const rejectedAppointments = appointments.filter(apt => apt.status === 'rejected');
 
   const getStatusBadge = (status: string) => {
@@ -61,6 +83,8 @@ const Appointments = () => {
         return <Badge className="bg-yellow-500">{t('appointments.awaitingApproval')}</Badge>;
       case 'confirmed':
         return <Badge className="bg-green-500">{t('appointments.appointmentConfirmed')}</Badge>;
+      case 'completed':
+        return <Badge className="bg-blue-500">Completed</Badge>;
       case 'rejected':
         return <Badge variant="destructive">{t('appointments.rejected')}</Badge>;
       default:
@@ -77,9 +101,10 @@ const Appointments = () => {
         </Button>
 
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="pending">{t('appointments.pending')} ({pendingAppointments.length})</TabsTrigger>
             <TabsTrigger value="confirmed">{t('appointments.confirmed')} ({confirmedAppointments.length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({completedAppointments.length})</TabsTrigger>
             <TabsTrigger value="rejected">{t('appointments.rejected')} ({rejectedAppointments.length})</TabsTrigger>
           </TabsList>
 
@@ -184,6 +209,82 @@ const Appointments = () => {
                     </CardContent>
                   </Card>
                 ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="completed" className="mt-6">
+            <div className="space-y-4">
+              {completedAppointments.length === 0 ? (
+                <Card className="shadow-soft">
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    No completed appointments yet.
+                  </CardContent>
+                </Card>
+              ) : (
+                completedAppointments.map((apt) => {
+                  const notes = appointmentNotes[apt.id];
+                  return (
+                    <Card key={apt.id} className="shadow-soft hover:shadow-medium transition-all">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary text-white text-lg font-bold">
+                              <Stethoscope className="h-6 w-6" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-lg">Dr. {apt.profiles?.name || 'Doctor'}</CardTitle>
+                              <CardDescription>
+                                <p>{apt.profiles?.email}</p>
+                                {apt.profiles?.phone && <p className="text-xs">📞 {apt.profiles?.phone}</p>}
+                              </CardDescription>
+                            </div>
+                          </div>
+                          {getStatusBadge(apt.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Date:</span>
+                            <span>{apt.date}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Time:</span>
+                            <span>{apt.time}</span>
+                          </div>
+                        </div>
+                        
+                        {notes && (
+                          <div className="mt-4 space-y-3 border-t pt-4">
+                            {notes.notes && (
+                              <div className="rounded-lg bg-muted/50 p-3">
+                                <h4 className="text-sm font-semibold mb-2">Doctor's Notes:</h4>
+                                <p className="text-sm whitespace-pre-wrap">{notes.notes}</p>
+                              </div>
+                            )}
+                            
+                            {notes.medicines_prescribed && (
+                              <div className="rounded-lg bg-muted/50 p-3">
+                                <h4 className="text-sm font-semibold mb-2">Prescribed Medicines:</h4>
+                                <p className="text-sm whitespace-pre-wrap">{notes.medicines_prescribed}</p>
+                              </div>
+                            )}
+                            
+                            {notes.follow_up_date && (
+                              <div className="rounded-lg bg-muted/50 p-3">
+                                <h4 className="text-sm font-semibold mb-2">Follow-up Date:</h4>
+                                <p className="text-sm">{new Date(notes.follow_up_date).toLocaleDateString()}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
             </div>
           </TabsContent>
