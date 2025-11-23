@@ -192,7 +192,7 @@ export default function PharmacyKiosk() {
 
       setCart([]);
       setShowCheckout(false);
-      navigate('/patient/dashboard');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Error placing order:', error);
       toast({
