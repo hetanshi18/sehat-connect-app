@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { LogOut, Stethoscope } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -36,6 +37,7 @@ const DashboardLayout = ({ children, role: userRole, title }: DashboardLayoutPro
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {userRole === 'patient' && <LanguageSwitcher />}
             <div className="text-right">
               <p className="text-sm font-medium text-foreground">{user?.user_metadata?.name || user?.email}</p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
