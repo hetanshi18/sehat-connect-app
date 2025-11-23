@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import SetupAdmin from "./pages/SetupAdmin";
 import PatientDashboard from "./pages/patient/Dashboard";
 import DoctorDashboard from "./pages/doctor/Dashboard";
 import Symptoms from "./pages/patient/Symptoms";
@@ -39,6 +40,7 @@ const App = () => {
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/setup-admin" element={<SetupAdmin />} />
             
             {/* Patient Routes */}
             <Route path="/dashboard" element={
