@@ -223,9 +223,23 @@ export default function Orders() {
                                   .getPublicUrl(filePath);
                                 window.open(publicUrl, '_blank');
                               } else if (order.prescription_id) {
-                                // View portal prescription using edge function
-                                const functionUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${order.prescription_id}`;
-                                window.open(functionUrl, '_blank');
+                                // Fetch portal prescription and open in new window
+                                const { data: rxData } = await supabase
+                                  .from('prescriptions')
+                                  .select('prescription_url')
+                                  .eq('id', order.prescription_id)
+                                  .single();
+                                
+                                if (rxData?.prescription_url) {
+                                  // Fetch the HTML content and open in new window to render properly
+                                  const response = await fetch(rxData.prescription_url);
+                                  const htmlContent = await response.text();
+                                  const newWindow = window.open('', '_blank');
+                                  if (newWindow) {
+                                    newWindow.document.write(htmlContent);
+                                    newWindow.document.close();
+                                  }
+                                }
                               }
                             } catch (error: any) {
                               console.error('Error viewing prescription:', error);
