@@ -19,9 +19,10 @@ export async function downloadPrescriptionAsPDF(prescriptionId: string, patientN
     container.innerHTML = html;
     container.style.position = 'absolute';
     container.style.left = '-9999px';
-    container.style.width = '750px'; // Adjusted width for better fit
+    container.style.width = '700px';
     container.style.padding = '0';
     container.style.margin = '0';
+    container.style.overflow = 'visible';
     document.body.appendChild(container);
     
     // Wait for images and styles to load
@@ -34,8 +35,8 @@ export async function downloadPrescriptionAsPDF(prescriptionId: string, patientN
       allowTaint: true,
       logging: false,
       backgroundColor: '#ffffff',
-      width: 750,
-      windowWidth: 750
+      width: 700,
+      windowWidth: 700
     });
     
     // Remove temporary container
