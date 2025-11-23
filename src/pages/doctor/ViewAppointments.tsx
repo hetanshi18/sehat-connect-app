@@ -261,11 +261,19 @@ const ViewAppointments = () => {
         .eq('appointment_id', appointmentId)
         .maybeSingle();
 
+      // Fetch prescriptions
+      const { data: prescription, error: prescError } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('appointment_id', appointmentId)
+        .maybeSingle();
+
       setConsultationDetails({
         ...appointment,
         doctor_notes: note?.notes,
         medicines_prescribed: note?.medicines_prescribed,
-        follow_up_date: note?.follow_up_date
+        follow_up_date: note?.follow_up_date,
+        prescription: prescription
       });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -873,7 +881,7 @@ const ViewAppointments = () => {
                     </CardContent>
                   </Card>
 
-                  {(consultationDetails.doctor_notes || consultationDetails.medicines_prescribed || consultationDetails.follow_up_date) && (
+                  {(consultationDetails.doctor_notes || consultationDetails.medicines_prescribed || consultationDetails.follow_up_date || consultationDetails.prescription) && (
                     <Card className="border-primary/20">
                       <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
@@ -882,6 +890,34 @@ const ViewAppointments = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
+                        {consultationDetails.prescription && (
+                          <div className="rounded-lg bg-primary/5 p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                  <FileText className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold">Prescription Available</h4>
+                                  <p className="text-xs text-muted-foreground">
+                                    Generated on {new Date(consultationDetails.prescription.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button 
+                                size="sm"
+                                onClick={() => {
+                                  const viewUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${consultationDetails.prescription.id}`;
+                                  window.open(viewUrl, '_blank');
+                                }}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                View
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
                         {consultationDetails.doctor_notes && (
                           <div>
                             <p className="text-sm font-medium mb-1">Doctor's Notes:</p>
