@@ -25,6 +25,10 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AddDoctor from "./pages/admin/AddDoctor";
 import ViewDoctors from "./pages/admin/ViewDoctors";
 import ViewPatients from "./pages/admin/ViewPatients";
+import PharmacyKiosk from "./pages/patient/PharmacyKiosk";
+import PharmacistDashboard from "./pages/pharmacist/Dashboard";
+import PharmacistMedicines from "./pages/pharmacist/Medicines";
+import PharmacistOrders from "./pages/pharmacist/Orders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +92,11 @@ const App = () => {
                 <Trends />
               </ProtectedRoute>
             } />
+            <Route path="/patient/pharmacy" element={
+              <ProtectedRoute requiredRole="patient">
+                <PharmacyKiosk />
+              </ProtectedRoute>
+            } />
             
             {/* Doctor Routes */}
             <Route path="/doctor/dashboard" element={
@@ -113,6 +122,23 @@ const App = () => {
             <Route path="/doctor/patient-history" element={
               <ProtectedRoute requiredRole="doctor">
                 <PatientHistory />
+              </ProtectedRoute>
+            } />
+            
+            {/* Pharmacist Routes */}
+            <Route path="/pharmacist/dashboard" element={
+              <ProtectedRoute requiredRole="pharmacist">
+                <PharmacistDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/pharmacist/medicines" element={
+              <ProtectedRoute requiredRole="pharmacist">
+                <PharmacistMedicines />
+              </ProtectedRoute>
+            } />
+            <Route path="/pharmacist/orders" element={
+              <ProtectedRoute requiredRole="pharmacist">
+                <PharmacistOrders />
               </ProtectedRoute>
             } />
             

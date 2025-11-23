@@ -12,7 +12,7 @@ export const getUserRole = async (userId: string) => {
     return null;
   }
   
-  return data?.role as 'patient' | 'doctor' | 'admin' | null;
+  return data?.role as 'patient' | 'doctor' | 'admin' | 'pharmacist' | null;
 };
 
 export const getUserProfile = async (userId: string) => {
