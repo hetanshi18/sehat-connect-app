@@ -127,7 +127,7 @@ export const GeneratePrescriptionDialog = ({ appointmentId, onSuccess }: Generat
                 <div className="flex gap-2 justify-center">
                   <Button onClick={() => window.open(generatedUrl, '_blank')}>
                     <Download className="mr-2 h-4 w-4" />
-                    Download Prescription
+                    View Prescription
                   </Button>
                   <Button variant="outline" onClick={handleClose}>
                     Close
