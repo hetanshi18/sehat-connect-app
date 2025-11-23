@@ -10,11 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Medicine } from '@/types/pharmacy';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 
 export default function Medicines() {
+  const navigate = useNavigate();
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [filteredMedicines, setFilteredMedicines] = useState<Medicine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,12 +188,18 @@ export default function Medicines() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Medicines</h1>
-          <p className="text-muted-foreground">Manage your medicine inventory</p>
-        </div>
+    <DashboardLayout role="pharmacist">
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/pharmacist/dashboard')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Medicines</h1>
+              <p className="text-muted-foreground">Manage your medicine inventory</p>
+            </div>
+          </div>
         <Button onClick={handleAdd}>
           <Plus className="mr-2 h-4 w-4" />
           Add Medicine
@@ -390,6 +399,7 @@ export default function Medicines() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

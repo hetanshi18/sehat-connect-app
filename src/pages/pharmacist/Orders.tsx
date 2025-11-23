@@ -7,11 +7,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { PharmacyOrder, OrderItem } from '@/types/pharmacy';
-import { Eye } from 'lucide-react';
+import { Eye, ArrowLeft, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 
 export default function Orders() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<PharmacyOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<PharmacyOrder | null>(null);
@@ -24,16 +27,30 @@ export default function Orders() {
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: ordersData, error } = await supabase
         .from('pharmacy_orders')
-        .select(`
-          *,
-          profiles:patient_id (name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setOrders((data || []) as any);
+
+      // Fetch patient details separately
+      const ordersWithPatients = await Promise.all(
+        (ordersData || []).map(async (order) => {
+          const { data: patientData } = await supabase
+            .from('profiles')
+            .select('name, email')
+            .eq('id', order.patient_id)
+            .single();
+          
+          return {
+            ...order,
+            patient: patientData
+          };
+        })
+      );
+
+      setOrders(ordersWithPatients as any);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({
@@ -111,11 +128,17 @@ export default function Orders() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Orders</h1>
-        <p className="text-muted-foreground">View and manage pharmacy orders</p>
-      </div>
+    <DashboardLayout role="pharmacist">
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/pharmacist/dashboard')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Orders</h1>
+            <p className="text-muted-foreground">View and manage pharmacy orders</p>
+          </div>
+        </div>
 
       {loading ? (
         <div className="space-y-2">
@@ -143,10 +166,10 @@ export default function Orders() {
                   <TableCell className="font-mono text-sm">
                     {order.id.substring(0, 8)}
                   </TableCell>
-                  <TableCell>
+                   <TableCell>
                     <div>
-                      <div className="font-medium">{order.profiles?.name}</div>
-                      <div className="text-sm text-muted-foreground">{order.profiles?.email}</div>
+                      <div className="font-medium">{order.patient?.name}</div>
+                      <div className="text-sm text-muted-foreground">{order.patient?.email}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -178,13 +201,30 @@ export default function Orders() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleViewOrder(order)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleViewOrder(order)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {order.prescription_id && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          asChild
+                        >
+                          <a 
+                            href={`https://qwsfjkaylxykyxaynsgq.supabase.co/storage/v1/object/public/prescriptions/${order.prescription_id}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -278,6 +318,7 @@ export default function Orders() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

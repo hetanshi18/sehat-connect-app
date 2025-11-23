@@ -26,6 +26,7 @@ import AddDoctor from "./pages/admin/AddDoctor";
 import ViewDoctors from "./pages/admin/ViewDoctors";
 import ViewPatients from "./pages/admin/ViewPatients";
 import PharmacyKiosk from "./pages/patient/PharmacyKiosk";
+import PatientOrders from "./pages/patient/Orders";
 import PharmacistDashboard from "./pages/pharmacist/Dashboard";
 import PharmacistMedicines from "./pages/pharmacist/Medicines";
 import PharmacistOrders from "./pages/pharmacist/Orders";
@@ -95,6 +96,11 @@ const App = () => {
             <Route path="/patient/pharmacy" element={
               <ProtectedRoute requiredRole="patient">
                 <PharmacyKiosk />
+              </ProtectedRoute>
+            } />
+            <Route path="/patient/orders" element={
+              <ProtectedRoute requiredRole="patient">
+                <PatientOrders />
               </ProtectedRoute>
             } />
             
