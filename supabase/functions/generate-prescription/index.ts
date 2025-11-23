@@ -75,37 +75,46 @@ serve(async (req) => {
         <style>
           * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
           }
           body {
             font-family: 'Arial', sans-serif;
-            max-width: 750px;
+            max-width: 700px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 40px 30px;
             line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
           .header {
             text-align: center;
             border-bottom: 3px solid #2563eb;
             padding-bottom: 20px;
             margin-bottom: 30px;
+            page-break-inside: avoid;
           }
           .header h1 {
             color: #2563eb;
-            margin: 0;
-            font-size: 28px;
+            margin: 0 0 15px 0;
+            font-size: 26px;
+            word-wrap: break-word;
           }
           .doctor-info {
-            margin-bottom: 20px;
+            margin-top: 15px;
           }
           .doctor-info p {
-            margin: 5px 0;
+            margin: 8px 0;
             color: #4b5563;
+            font-size: 14px;
+            line-height: 1.5;
           }
           .patient-section, .prescription-section {
             margin: 30px 0;
             padding: 20px;
             background: #f9fafb;
             border-radius: 8px;
+            page-break-inside: avoid;
           }
           .section-title {
             font-size: 18px;
@@ -149,6 +158,7 @@ serve(async (req) => {
           .signature-section {
             margin-top: 60px;
             text-align: right;
+            page-break-inside: avoid;
           }
           .signature-image {
             max-width: 200px;
@@ -177,10 +187,10 @@ serve(async (req) => {
         <div class="header">
           <h1>Dr. ${appointment.doctor.name}</h1>
           <div class="doctor-info">
-            <p><strong>${doctorInfo.qualification || ''}</strong></p>
-            <p>${doctorInfo.specialty || ''}</p>
+            ${doctorInfo.qualification ? `<p><strong>${doctorInfo.qualification}</strong></p>` : ''}
+            ${doctorInfo.specialty ? `<p>${doctorInfo.specialty}</p>` : ''}
             ${doctorInfo.registration_number ? `<p>Reg. No: ${doctorInfo.registration_number}</p>` : ''}
-            <p>${doctorInfo.clinic_address || ''}</p>
+            ${doctorInfo.clinic_address ? `<p>${doctorInfo.clinic_address}</p>` : ''}
             ${appointment.doctor.phone ? `<p>Phone: ${appointment.doctor.phone}</p>` : ''}
           </div>
         </div>
