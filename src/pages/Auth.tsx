@@ -40,7 +40,11 @@ const Auth = () => {
     if (data.user) {
       const userRole = await getUserRole(data.user.id);
       toast({ title: t('auth.success'), description: t('auth.successWelcome') });
-      navigate(userRole === 'patient' ? '/dashboard' : '/doctor/dashboard');
+      navigate(
+        userRole === 'patient' ? '/dashboard' : 
+        userRole === 'doctor' ? '/doctor/dashboard' : 
+        '/admin/dashboard'
+      );
     }
   };
 

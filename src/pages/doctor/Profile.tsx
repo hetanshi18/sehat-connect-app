@@ -219,7 +219,7 @@ const DoctorProfile = () => {
   ];
 
   return (
-    <DashboardLayout title="Doctor Profile">
+    <DashboardLayout role="doctor" title="Doctor Profile">
       <div className="max-w-5xl">
         <div className="flex items-center justify-between mb-4">
           <Button variant="ghost" onClick={() => navigate('/doctor/dashboard')}>

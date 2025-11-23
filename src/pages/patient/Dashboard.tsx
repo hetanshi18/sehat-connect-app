@@ -22,7 +22,7 @@ const PatientDashboard = () => {
   ];
 
   return (
-    <DashboardLayout title={t('dashboard.patientTitle')}>
+    <DashboardLayout role="patient" title={t('dashboard.patientTitle')}>
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">

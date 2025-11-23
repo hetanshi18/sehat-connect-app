@@ -108,7 +108,7 @@ This is a preliminary report. Please consult with a healthcare professional for 
     const selectedSymptomNames = mockSymptoms.filter(s => selectedSymptoms.includes(s.id)).map(s => s.name);
     
     return (
-      <DashboardLayout title={t('symptoms.reportTitle')}>
+      <DashboardLayout role="patient" title={t('symptoms.reportTitle')}>
         <div className="max-w-2xl">
           <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -199,7 +199,7 @@ This is a preliminary report. Please consult with a healthcare professional for 
   const symptomCategories = [...new Set(mockSymptoms.map(s => s.category))];
 
   return (
-    <DashboardLayout title="Record Symptoms">
+    <DashboardLayout role="patient" title="Record Symptoms">
       <div className="max-w-3xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />

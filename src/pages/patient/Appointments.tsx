@@ -109,7 +109,7 @@ const Appointments = () => {
   };
 
   return (
-    <DashboardLayout title={t('appointments.title')}>
+    <DashboardLayout role="patient" title={t('appointments.title')}>
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />

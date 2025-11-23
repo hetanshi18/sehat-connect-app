@@ -73,7 +73,7 @@ const PatientProfile = () => {
   const prescriptions = healthRecords.filter(r => r.type === 'prescription');
 
   return (
-    <DashboardLayout title={t('profile.title')}>
+    <DashboardLayout role="patient" title={t('profile.title')}>
       <div className="max-w-5xl">
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
