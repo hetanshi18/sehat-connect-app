@@ -167,31 +167,40 @@ const DoctorProfile = () => {
     setUploadingSignature(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `signature/${user.id}/signature.${fileExt}`;
+      const fileName = `signatures/${user.id}-signature-${Date.now()}.${fileExt}`;
 
       // Delete old signature if exists
       if (formData.signatureUrl) {
-        const oldPath = formData.signatureUrl.split('/').slice(-3).join('/');
-        await supabase.storage.from('health-documents').remove([oldPath]);
+        try {
+          const oldPath = formData.signatureUrl.split('/').slice(-1)[0];
+          if (oldPath.includes('signature')) {
+            await supabase.storage.from('prescriptions').remove([`signatures/${oldPath}`]);
+          }
+        } catch (err) {
+          console.log('Error removing old signature:', err);
+        }
       }
 
-      // Upload new signature
+      // Upload new signature to public prescriptions bucket
       const { error: uploadError } = await supabase.storage
-        .from('health-documents')
-        .upload(fileName, file, { upsert: true });
+        .from('prescriptions')
+        .upload(fileName, file, { 
+          upsert: true,
+          contentType: file.type 
+        });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('health-documents')
+        .from('prescriptions')
         .getPublicUrl(fileName);
 
       setFormData({ ...formData, signatureUrl: urlData.publicUrl });
-      toast({ title: 'Success', description: 'Signature uploaded successfully' });
+      toast({ title: 'Success', description: 'Signature uploaded successfully. Remember to save your profile!' });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Error', description: error.message || 'Failed to upload signature', variant: 'destructive' });
     } finally {
       setUploadingSignature(false);
     }
