@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { FilterBar } from '@/components/ui/filter-bar';
 
 const Consult = () => {
   const navigate = useNavigate();
@@ -25,6 +26,12 @@ const Consult = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [filteredSlots, setFilteredSlots] = useState<any[]>([]);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+  const [selectedRating, setSelectedRating] = useState('all');
+  const [selectedAvailability, setSelectedAvailability] = useState('all');
 
   useEffect(() => {
     fetchDoctors();
@@ -165,10 +172,37 @@ const Consult = () => {
     }
   };
 
+  // Get unique specialties from doctors
+  const specialties = useMemo(() => {
+    return Array.from(new Set(doctors.map(d => d.specialty).filter(Boolean)));
+  }, [doctors]);
+
+  // Filter doctors based on search and filters
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter(doctor => {
+      // Search filter
+      const matchesSearch = searchQuery === '' || 
+        doctor.profiles?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doctor.specialty?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Specialty filter
+      const matchesSpecialty = selectedSpecialty === 'all' || doctor.specialty === selectedSpecialty;
+
+      // Rating filter (mocked - would need real rating data)
+      const doctorRating = 4.8; // Mock rating
+      const matchesRating = selectedRating === 'all' || doctorRating >= parseFloat(selectedRating);
+
+      // Availability filter (simplified - just show all for now)
+      const matchesAvailability = selectedAvailability === 'all';
+
+      return matchesSearch && matchesSpecialty && matchesRating && matchesAvailability;
+    });
+  }, [doctors, searchQuery, selectedSpecialty, selectedRating, selectedAvailability]);
+
   return (
     <DashboardLayout title="Book Doctor Consultation">
       <div className="max-w-5xl">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Button>
@@ -178,8 +212,24 @@ const Consult = () => {
         ) : doctors.length === 0 ? (
           <p className="text-center py-8">No doctors available</p>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {doctors.map((doctor) => (
+          <>
+            <FilterBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedSpecialty={selectedSpecialty}
+              onSpecialtyChange={setSelectedSpecialty}
+              selectedRating={selectedRating}
+              onRatingChange={setSelectedRating}
+              selectedAvailability={selectedAvailability}
+              onAvailabilityChange={setSelectedAvailability}
+              specialties={specialties}
+            />
+            
+            {filteredDoctors.length === 0 ? (
+              <p className="text-center py-8 text-muted-foreground">No doctors match your filters</p>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredDoctors.map((doctor) => (
               <Card key={doctor.user_id} className="shadow-soft hover:shadow-medium transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -297,8 +347,10 @@ const Consult = () => {
                   </Dialog>
               </CardContent>
               </Card>
-            ))}
-          </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </DashboardLayout>
