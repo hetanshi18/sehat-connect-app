@@ -31,27 +31,38 @@ const Appointments = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch appointments
+      const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select(`
           *,
-          profiles!appointments_doctor_fkey (
+          profiles!appointments_doctor_id_fkey (
             id,
             name,
             email,
             phone
-          ),
-          appointment_notes (
-            notes,
-            medicines_prescribed,
-            follow_up_date
           )
         `)
         .eq('patient_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setAppointments(data || []);
+      if (appointmentsError) throw appointmentsError;
+
+      // Fetch appointment notes separately
+      const { data: notesData, error: notesError } = await supabase
+        .from('appointment_notes')
+        .select('*')
+        .eq('patient_id', user.id);
+
+      if (notesError) throw notesError;
+
+      // Merge appointments with their notes
+      const appointmentsWithNotes = (appointmentsData || []).map(apt => ({
+        ...apt,
+        appointment_notes: notesData?.filter(note => note.appointment_id === apt.id) || []
+      }));
+
+      setAppointments(appointmentsWithNotes);
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -62,7 +73,10 @@ const Appointments = () => {
   const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
   const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmed');
   const rejectedAppointments = appointments.filter(apt => apt.status === 'rejected');
-  const completedAppointments = appointments.filter(apt => apt.status === 'completed');
+  // Filter completed appointments to only show those with notes (medical records)
+  const completedAppointments = appointments.filter(apt => 
+    apt.status === 'completed' && apt.appointment_notes && apt.appointment_notes.length > 0
+  );
 
   const handleViewNotes = (appointment: any) => {
     setSelectedAppointment(appointment);
