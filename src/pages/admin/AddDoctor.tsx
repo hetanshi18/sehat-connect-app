@@ -27,21 +27,45 @@ export default function AddDoctor() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('admin-add-doctor', {
-        body: {
-          email: formData.email,
-          name: formData.name,
-          specialty: formData.specialty,
-          qualification: formData.qualification,
-          experience: parseInt(formData.experience) || 0,
-          clinicAddress: formData.clinicAddress,
-        },
+      // Create doctor account using client-side signup
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: 'dr@123', // Default password for all doctors
+        options: {
+          data: {
+            name: formData.name,
+            role: 'doctor'
+          },
+          emailRedirectTo: `${window.location.origin}/`
+        }
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
 
-      toast.success(data.message || 'Doctor added successfully!');
-      navigate('/admin/doctors');
+      if (signUpData.user) {
+        // Update doctor info with additional details
+        if (formData.specialty || formData.qualification || formData.experience || formData.clinicAddress) {
+          // Wait a bit for the trigger to create the doctors_info entry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const { error: updateError } = await supabase
+            .from('doctors_info')
+            .update({
+              specialty: formData.specialty || '',
+              qualification: formData.qualification || '',
+              experience: parseInt(formData.experience) || 0,
+              clinic_address: formData.clinicAddress || ''
+            })
+            .eq('user_id', signUpData.user.id);
+
+          if (updateError) {
+            console.error('Error updating doctor info:', updateError);
+          }
+        }
+
+        toast.success('Doctor created successfully! Default password: dr@123');
+        navigate('/admin/doctors');
+      }
     } catch (error: any) {
       console.error('Error adding doctor:', error);
       toast.error(error.message || 'Failed to add doctor');
