@@ -8,7 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft, Calendar, Clock, User, FileText, Check, X, Pill, Stethoscope } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Calendar, Clock, User, FileText, Check, X, Pill, Stethoscope, Mail, Phone, Activity, TrendingUp, Download, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -149,11 +151,26 @@ const ViewAppointments = () => {
 
   const fetchPatientHistory = async (patientId: string, patientInfo: any) => {
     setHistoryLoading(true);
-    setSelectedPatient(patientInfo);
     setShowPatientHistory(true);
 
     try {
-      // Fetch all appointments for this patient
+      // Fetch patient profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', patientId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Fetch patient info
+      const { data: info, error: infoError } = await supabase
+        .from('patients_info')
+        .select('*')
+        .eq('user_id', patientId)
+        .maybeSingle();
+
+      // Fetch appointments with related data
       const { data: appointments, error: aptError } = await supabase
         .from('appointments')
         .select('*')
@@ -163,34 +180,58 @@ const ViewAppointments = () => {
 
       if (aptError) throw aptError;
 
+      // Fetch symptoms records for this patient
+      const { data: symptomsRecords, error: symptomsError } = await supabase
+        .from('symptoms_records')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('recorded_at', { ascending: false });
+
       // Fetch appointment notes
       const { data: notes, error: notesError } = await supabase
         .from('appointment_notes')
         .select('*')
         .eq('patient_id', patientId)
-        .eq('doctor_id', user?.id);
-
-      if (notesError) throw notesError;
+        .eq('doctor_id', user?.id)
+        .order('created_at', { ascending: false });
 
       // Fetch health records
-      const { data: healthRecords, error: recordsError } = await supabase
+      const { data: records, error: recordsError } = await supabase
         .from('health_records')
         .select('*')
         .eq('patient_id', patientId)
         .order('created_at', { ascending: false });
 
-      // Combine appointment data with notes
+      if (recordsError) throw recordsError;
+
+      // Combine data
       const history = appointments?.map(apt => {
+        const symptomRecord = symptomsRecords?.find(sr => 
+          new Date(sr.recorded_at).toDateString() === new Date(apt.created_at).toDateString()
+        );
         const note = notes?.find(n => n.appointment_id === apt.id);
+
         return {
           ...apt,
+          symptoms_report: symptomRecord?.additional_notes,
+          medicines: note?.medicines_prescribed,
           doctor_notes: note?.notes,
-          medicines_prescribed: note?.medicines_prescribed,
           follow_up_date: note?.follow_up_date
         };
       }) || [];
 
       setPatientHistory(history);
+      
+      // Set patient data with all info
+      setSelectedPatient({
+        ...patientInfo,
+        profile,
+        patientInfo: info,
+        healthRecords: records || [],
+        totalAppointments: appointments?.length || 0,
+        completedFollowUps: notes?.filter(n => n.follow_up_date && new Date(n.follow_up_date) < new Date()).length || 0
+      });
+
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -468,93 +509,312 @@ const ViewAppointments = () => {
 
         {/* Patient History Dialog */}
         <Dialog open={showPatientHistory} onOpenChange={setShowPatientHistory}>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogContent className="max-w-6xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>Patient History - {selectedPatient?.name}</DialogTitle>
-              <DialogDescription>
-                Complete medical history and appointment records
-              </DialogDescription>
+              <DialogDescription>Complete medical history and appointments</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="h-[60vh] pr-4">
-              {historyLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading...</div>
-              ) : patientHistory.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No history found</div>
-              ) : (
-                <div className="space-y-4">
-                  {patientHistory.map((apt) => (
-                    <Card key={apt.id} className="border-l-4 border-l-primary">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-base flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {apt.date} at {apt.time}
+            
+            <ScrollArea className="h-[calc(90vh-120px)] pr-4">
+              <div className="space-y-6">
+                {historyLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                  </div>
+                ) : (
+                  <>
+                    {/* Patient Overview */}
+                    {selectedPatient?.profile && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Patient Overview
                           </CardTitle>
-                          <Badge className={apt.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'}>
-                            {apt.status}
-                          </Badge>
-                        </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                <User className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Name</p>
+                                <p className="font-medium">{selectedPatient.profile.name}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10">
+                                <Mail className="h-5 w-5 text-secondary" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Email</p>
+                                <p className="font-medium">{selectedPatient.profile.email}</p>
+                              </div>
+                            </div>
+
+                            {selectedPatient.profile.phone && (
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
+                                  <Phone className="h-5 w-5 text-accent" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Phone</p>
+                                  <p className="font-medium">{selectedPatient.profile.phone}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedPatient.patientInfo?.age && (
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                  <Calendar className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Age</p>
+                                  <p className="font-medium">{selectedPatient.patientInfo.age} years</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedPatient.patientInfo?.blood_group && (
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10">
+                                  <Activity className="h-5 w-5 text-red-500" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Blood Group</p>
+                                  <p className="font-medium">{selectedPatient.patientInfo.blood_group}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
+                                <FileText className="h-5 w-5 text-green-500" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Total Appointments</p>
+                                <p className="font-medium">{selectedPatient.totalAppointments || 0}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {selectedPatient.patientInfo?.address && (
+                            <div className="mt-4 pt-4 border-t">
+                              <p className="text-sm text-muted-foreground mb-1">Address</p>
+                              <p className="font-medium">{selectedPatient.patientInfo.address}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Health Records */}
+                    {selectedPatient?.healthRecords && selectedPatient.healthRecords.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <FileText className="h-5 w-5" />
+                            Health Records
+                          </CardTitle>
+                          <CardDescription>Documents uploaded by patient</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {selectedPatient.healthRecords.map((record: any) => (
+                              <div key={record.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/5 transition-colors">
+                                <div className="flex-1">
+                                  <p className="font-medium">{record.title}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {record.type}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date(record.created_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                                {record.file_url && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.open(record.file_url, '_blank')}
+                                  >
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Download
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Treatment Progress */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5" />
+                          Treatment Progress
+                        </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        {apt.symptoms && apt.symptoms.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Symptoms:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {apt.symptoms.map((symptom: string, idx: number) => (
-                                <Badge key={idx} variant="secondary">{symptom}</Badge>
-                              ))}
-                            </div>
+                      <CardContent>
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="text-center p-4 bg-primary/5 rounded-lg">
+                            <p className="text-3xl font-bold text-primary">{selectedPatient?.totalAppointments || 0}</p>
+                            <p className="text-sm text-muted-foreground mt-1">Total Visits</p>
                           </div>
-                        )}
-
-                        {apt.notes && (
-                          <div>
-                            <p className="text-sm font-medium mb-1">Patient Notes:</p>
-                            <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                              {apt.notes}
-                            </p>
+                          <div className="text-center p-4 bg-secondary/5 rounded-lg">
+                            <p className="text-3xl font-bold text-secondary">{selectedPatient?.completedFollowUps || 0}</p>
+                            <p className="text-sm text-muted-foreground mt-1">Follow-ups Completed</p>
                           </div>
-                        )}
-
-                        {apt.doctor_notes && (
-                          <>
-                            <Separator />
-                            <div>
-                              <p className="text-sm font-medium mb-1 flex items-center gap-2">
-                                <Stethoscope className="h-4 w-4" />
-                                Doctor's Notes:
-                              </p>
-                              <p className="text-sm text-muted-foreground bg-primary/5 p-3 rounded-md">
-                                {apt.doctor_notes}
-                              </p>
-                            </div>
-                          </>
-                        )}
-
-                        {apt.medicines_prescribed && (
-                          <div>
-                            <p className="text-sm font-medium mb-1 flex items-center gap-2">
-                              <Pill className="h-4 w-4" />
-                              Medicines Prescribed:
+                          <div className="text-center p-4 bg-accent/5 rounded-lg">
+                            <p className="text-3xl font-bold text-accent">
+                              {patientHistory.filter((a: any) => a.status === 'completed').length}
                             </p>
-                            <p className="text-sm text-muted-foreground bg-secondary/5 p-3 rounded-md">
-                              {apt.medicines_prescribed}
-                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">Completed Consultations</p>
                           </div>
-                        )}
+                        </div>
 
-                        {apt.follow_up_date && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Follow-up Date:</span>
-                            <span>{new Date(apt.follow_up_date).toLocaleDateString()}</span>
+                        {patientHistory.length > 0 && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                            <p className="text-sm text-foreground">
+                              Patient has {(selectedPatient?.totalAppointments || 0) > 1 ? `completed ${selectedPatient?.totalAppointments} consultations` : 'started their treatment journey'}.
+                              {patientHistory[0]?.follow_up_date && (
+                                <> Next follow-up: <span className="font-medium">
+                                  {new Date(patientHistory[0].follow_up_date).toLocaleDateString()}
+                                </span></>
+                              )}
+                            </p>
                           </div>
                         )}
                       </CardContent>
                     </Card>
-                  ))}
-                </div>
-              )}
+
+                    {/* Appointment Timeline */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Appointment Timeline</CardTitle>
+                        <CardDescription>Complete medical history with all consultations</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {patientHistory.length === 0 ? (
+                          <p className="text-center text-muted-foreground py-8">
+                            No history found for this patient.
+                          </p>
+                        ) : (
+                          <div className="space-y-4">
+                            {patientHistory.map((appointment: any) => (
+                              <Collapsible key={appointment.id}>
+                                <Card className="border-l-4" style={{ borderLeftColor: `var(--${appointment.status === 'completed' ? 'primary' : appointment.status === 'confirmed' ? 'secondary' : 'muted'})` }}>
+                                  <CollapsibleTrigger className="w-full">
+                                    <CardHeader className="hover:bg-muted/50 transition-colors">
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                          <div className="text-left">
+                                            <div className="flex items-center gap-2">
+                                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                                              <span className="font-medium">{new Date(appointment.date).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                              <Clock className="h-4 w-4 text-muted-foreground" />
+                                              <span className="text-sm text-muted-foreground">{appointment.time}</span>
+                                            </div>
+                                          </div>
+                                          <Badge variant={appointment.status === 'completed' ? 'default' : 'secondary'}>
+                                            {appointment.status}
+                                          </Badge>
+                                        </div>
+                                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                                      </div>
+                                    </CardHeader>
+                                  </CollapsibleTrigger>
+                                  
+                                  <CollapsibleContent>
+                                    <CardContent className="space-y-4 pt-4 border-t">
+                                      {appointment.symptoms && appointment.symptoms.length > 0 && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                                            <Activity className="h-4 w-4" />
+                                            Symptoms
+                                          </p>
+                                          <div className="flex flex-wrap gap-2">
+                                            {appointment.symptoms.map((symptom: string, idx: number) => (
+                                              <Badge key={idx} variant="outline">{symptom}</Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {appointment.notes && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2">Patient Notes</p>
+                                          <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                                            {appointment.notes}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {appointment.symptoms_report && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2">Symptoms Report</p>
+                                          <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                                            {appointment.symptoms_report}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {appointment.doctor_notes && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                                            <Stethoscope className="h-4 w-4" />
+                                            Doctor's Notes
+                                          </p>
+                                          <p className="text-sm text-muted-foreground bg-primary/5 p-3 rounded-lg">
+                                            {appointment.doctor_notes}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {appointment.medicines && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                                            <Pill className="h-4 w-4" />
+                                            Medicines Prescribed
+                                          </p>
+                                          <p className="text-sm text-muted-foreground bg-secondary/5 p-3 rounded-lg">
+                                            {appointment.medicines}
+                                          </p>
+                                        </div>
+                                      )}
+
+                                      {appointment.follow_up_date && (
+                                        <div>
+                                          <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                                            <Calendar className="h-4 w-4" />
+                                            Follow-up Date
+                                          </p>
+                                          <Badge variant="outline" className="text-sm">
+                                            {new Date(appointment.follow_up_date).toLocaleDateString()}
+                                          </Badge>
+                                        </div>
+                                      )}
+                                    </CardContent>
+                                  </CollapsibleContent>
+                                </Card>
+                              </Collapsible>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </ScrollArea>
           </DialogContent>
         </Dialog>
