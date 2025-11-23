@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
 import { Medicine, CartItem } from '@/types/pharmacy';
-import { ShoppingCart, Plus, Minus, Trash2, Search, Pill, Package } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2, Search, Pill, Package, Upload, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PharmacyKiosk() {
@@ -29,6 +29,8 @@ export default function PharmacyKiosk() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [pickupLocation, setPickupLocation] = useState('Main Pharmacy');
   const [submitting, setSubmitting] = useState(false);
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchMedicines();
@@ -130,6 +132,38 @@ export default function PharmacyKiosk() {
     return cart.reduce((sum, item) => sum + (item.medicine.price * item.quantity), 0);
   };
 
+  const hasPrescriptionRequired = () => {
+    return cart.some(item => item.medicine.prescription_required);
+  };
+
+  const handlePrescriptionUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload a JPG, PNG, or PDF file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload a file smaller than 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPrescriptionFile(file);
+  };
+
   const handleCheckout = async () => {
     if (cart.length === 0) {
       toast({
@@ -155,6 +189,23 @@ export default function PharmacyKiosk() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      let prescriptionId = null;
+
+      // Upload prescription if provided
+      if (prescriptionFile) {
+        setUploading(true);
+        const fileExt = prescriptionFile.name.split('.').pop();
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('prescriptions')
+          .upload(fileName, prescriptionFile);
+
+        if (uploadError) throw uploadError;
+        prescriptionId = fileName;
+        setUploading(false);
+      }
+
       // Create order
       const { data: order, error: orderError } = await supabase
         .from('pharmacy_orders')
@@ -165,6 +216,7 @@ export default function PharmacyKiosk() {
           delivery_address: deliveryType === 'home_delivery' ? deliveryAddress : null,
           pickup_location: deliveryType === 'pickup' ? pickupLocation : null,
           status: 'pending',
+          prescription_id: prescriptionId,
         })
         .select()
         .single();
@@ -191,6 +243,7 @@ export default function PharmacyKiosk() {
       });
 
       setCart([]);
+      setPrescriptionFile(null);
       setShowCheckout(false);
       navigate('/dashboard');
     } catch (error: any) {
@@ -414,6 +467,46 @@ export default function PharmacyKiosk() {
                     </div>
                   )}
                 </div>
+
+                {hasPrescriptionRequired() && (
+                  <div className="space-y-3 pt-4 border-t">
+                    <Label className="text-sm font-medium">Prescription Upload (Required)</Label>
+                    <p className="text-xs text-muted-foreground">Some medicines in your cart require a prescription</p>
+                    
+                    {!prescriptionFile ? (
+                      <div className="flex items-center gap-2">
+                        <Button type="button" variant="outline" onClick={() => document.getElementById('prescription-upload')?.click()}>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Upload Prescription
+                        </Button>
+                        <input
+                          id="prescription-upload"
+                          type="file"
+                          accept="image/jpeg,image/png,image/jpg,application/pdf"
+                          className="hidden"
+                          onChange={handlePrescriptionUpload}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 p-2 border rounded-lg">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{prescriptionFile.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(prescriptionFile.size / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setPrescriptionFile(null)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -422,8 +515,11 @@ export default function PharmacyKiosk() {
             <Button variant="outline" onClick={() => setShowCheckout(false)}>
               Continue Shopping
             </Button>
-            <Button onClick={handleCheckout} disabled={cart.length === 0 || submitting}>
-              {submitting ? 'Placing Order...' : 'Place Order'}
+            <Button 
+              onClick={handleCheckout} 
+              disabled={cart.length === 0 || submitting || uploading || (hasPrescriptionRequired() && !prescriptionFile)}
+            >
+              {uploading ? 'Uploading...' : submitting ? 'Placing Order...' : 'Place Order'}
             </Button>
           </DialogFooter>
         </DialogContent>

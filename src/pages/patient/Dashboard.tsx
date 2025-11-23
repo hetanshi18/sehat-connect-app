@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock, User } from 'lucide-react';
+import { Activity, Calendar, ClipboardList, TrendingUp, Stethoscope, FileText, Clock, User, Package } from 'lucide-react';
 import { mockAppointments } from '@/lib/mockData';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -18,6 +18,7 @@ const PatientDashboard = () => {
     { title: t('dashboard.bookConsultation'), description: t('dashboard.scheduleDoctor'), icon: Stethoscope, path: '/consult', color: 'bg-gradient-secondary' },
     { title: t('dashboard.recordSymptoms'), description: t('dashboard.logSymptoms'), icon: ClipboardList, path: '/symptoms', color: 'bg-gradient-warm' },
     { title: 'Pharmacy', description: 'Order medicines', icon: FileText, path: '/patient/pharmacy', color: 'bg-secondary' },
+    { title: 'My Orders', description: 'View order history', icon: Package, path: '/patient/orders', color: 'bg-accent' },
     { title: t('dashboard.healthTrends'), description: t('dashboard.viewAnalytics'), icon: TrendingUp, path: '/trends', color: 'bg-primary' },
     { title: t('dashboard.myProfile'), description: t('dashboard.viewEditProfile'), icon: User, path: '/profile', color: 'bg-accent' },
   ];
