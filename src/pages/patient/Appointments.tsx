@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Download, FileDown } from 'lucide-react';
+import { downloadPrescriptionAsPDF } from '@/lib/pdfUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
@@ -287,16 +288,33 @@ const Appointments = () => {
                                   </p>
                                 </div>
                               </div>
-                              <Button 
-                                size="sm"
-                                onClick={() => {
-                                  const viewUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${prescription.id}`;
-                                  window.open(viewUrl, '_blank');
-                                }}
-                              >
-                                <Download className="mr-2 h-4 w-4" />
-                                View
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    const viewUrl = `https://qwsfjkaylxykyxaynsgq.supabase.co/functions/v1/view-prescription?id=${prescription.id}`;
+                                    window.open(viewUrl, '_blank');
+                                  }}
+                                >
+                                  <FileText className="mr-2 h-4 w-4" />
+                                  View
+                                </Button>
+                                <Button 
+                                  size="sm"
+                                  onClick={async () => {
+                                    try {
+                                      await downloadPrescriptionAsPDF(prescription.id, apt.profiles?.name || 'prescription');
+                                      toast({ title: 'Success', description: 'Prescription downloaded successfully' });
+                                    } catch (error) {
+                                      toast({ title: 'Error', description: 'Failed to download prescription', variant: 'destructive' });
+                                    }
+                                  }}
+                                >
+                                  <FileDown className="mr-2 h-4 w-4" />
+                                  Download PDF
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         )}
