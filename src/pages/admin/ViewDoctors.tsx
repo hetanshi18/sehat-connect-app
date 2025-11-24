@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowLeft } from 'lucide-react';
 
 interface Doctor {
   id: string;
@@ -73,15 +73,24 @@ export default function ViewDoctors() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">All Doctors</h1>
-            <p className="text-muted-foreground mt-2">Manage doctor accounts</p>
-          </div>
-          <Button onClick={() => navigate('/admin/add-doctor')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Doctor
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/admin/dashboard')}
+          >
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div className="flex-1 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">All Doctors</h1>
+              <p className="text-muted-foreground mt-2">Manage doctor accounts</p>
+            </div>
+            <Button onClick={() => navigate('/admin/add-doctor')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Doctor
+            </Button>
+          </div>
         </div>
 
         <Card>

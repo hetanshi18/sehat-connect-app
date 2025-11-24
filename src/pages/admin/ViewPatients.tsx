@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 interface Patient {
   id: string;
@@ -14,6 +17,7 @@ interface Patient {
 }
 
 export default function ViewPatients() {
+  const navigate = useNavigate();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,9 +73,18 @@ export default function ViewPatients() {
   return (
     <DashboardLayout role="admin">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">All Patients</h1>
-          <p className="text-muted-foreground mt-2">View all registered patients</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/admin/dashboard')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">All Patients</h1>
+            <p className="text-muted-foreground mt-2">View all registered patients</p>
+          </div>
         </div>
 
         <Card>

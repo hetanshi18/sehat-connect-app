@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { Medicine } from '@/types/pharmacy';
-import { Plus, Pencil, Trash2, Search, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, ArrowLeft, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,6 +36,8 @@ export default function Medicines() {
     status: 'in_stock' as 'in_stock' | 'out_of_stock' | 'discontinued',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showCsvUpload, setShowCsvUpload] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchMedicines();
@@ -165,6 +167,75 @@ export default function Medicines() {
     }
   };
 
+  const handleCsvUpload = async () => {
+    if (!csvFile) {
+      toast({ title: 'Error', description: 'Please select a CSV file', variant: 'destructive' });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const text = await csvFile.text();
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      // Expected headers: name,description,category,price,stock_quantity,manufacturer,prescription_required,status
+      const requiredHeaders = ['name', 'category', 'price'];
+      const hasRequiredHeaders = requiredHeaders.every(h => headers.includes(h));
+      
+      if (!hasRequiredHeaders) {
+        toast({ 
+          title: 'Error', 
+          description: 'CSV must contain at least: name, category, price',
+          variant: 'destructive' 
+        });
+        setSubmitting(false);
+        return;
+      }
+
+      const medicines = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        
+        const values = lines[i].split(',').map(v => v.trim());
+        const medicine: any = {};
+        
+        headers.forEach((header, idx) => {
+          medicine[header] = values[idx] || null;
+        });
+
+        // Parse required fields
+        medicine.price = parseFloat(medicine.price);
+        medicine.stock_quantity = parseInt(medicine.stock_quantity) || 0;
+        medicine.prescription_required = medicine.prescription_required === 'true' || medicine.prescription_required === '1';
+        medicine.status = medicine.status || 'in_stock';
+
+        medicines.push(medicine);
+      }
+
+      if (medicines.length === 0) {
+        toast({ title: 'Error', description: 'No valid medicines found in CSV', variant: 'destructive' });
+        setSubmitting(false);
+        return;
+      }
+
+      // Insert medicines in batch
+      const { error } = await supabase.from('medicines').insert(medicines);
+
+      if (error) throw error;
+
+      toast({ title: 'Success', description: `${medicines.length} medicines uploaded successfully` });
+      setShowCsvUpload(false);
+      setCsvFile(null);
+      fetchMedicines();
+    } catch (error: any) {
+      console.error('CSV upload error:', error);
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this medicine?')) return;
 
@@ -200,10 +271,16 @@ export default function Medicines() {
               <p className="text-muted-foreground">Manage your medicine inventory</p>
             </div>
           </div>
-        <Button onClick={handleAdd}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Medicine
-        </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setShowCsvUpload(true)} variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Upload CSV
+            </Button>
+            <Button onClick={handleAdd}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Medicine
+            </Button>
+          </div>
       </div>
 
       <div className="relative">
@@ -283,6 +360,39 @@ export default function Medicines() {
           </Table>
         </div>
       )}
+
+        {/* CSV Upload Dialog */}
+        <Dialog open={showCsvUpload} onOpenChange={setShowCsvUpload}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upload Medicines from CSV</DialogTitle>
+              <DialogDescription>
+                Upload a CSV file with columns: name, description, category, price, stock_quantity, manufacturer, prescription_required (true/false), status
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>CSV File</Label>
+                <Input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Required columns: name, category, price
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCsvUpload(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCsvUpload} disabled={!csvFile || submitting}>
+                {submitting ? 'Uploading...' : 'Upload'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">

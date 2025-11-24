@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Download, FileDown } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, User, Stethoscope, FileText, Download, FileDown, Eye } from 'lucide-react';
 import { downloadPrescriptionAsPDF } from '@/lib/pdfUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import PrescriptionViewDialog from '@/components/PrescriptionViewDialog';
 
 const Appointments = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const Appointments = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [prescriptions, setPrescriptions] = useState<Record<string, any>>({});
+  const [selectedPrescriptionId, setSelectedPrescriptionId] = useState<string | null>(null);
+  const [showPrescriptionDialog, setShowPrescriptionDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -291,6 +294,17 @@ const Appointments = () => {
                               <div className="flex gap-2">
                                 <Button 
                                   size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedPrescriptionId(prescription.id);
+                                    setShowPrescriptionDialog(true);
+                                  }}
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View
+                                </Button>
+                                <Button 
+                                  size="sm"
                                   onClick={async () => {
                                     try {
                                       await downloadPrescriptionAsPDF(prescription.id, apt.profiles?.name || 'prescription');
@@ -301,7 +315,7 @@ const Appointments = () => {
                                   }}
                                 >
                                   <FileDown className="mr-2 h-4 w-4" />
-                                  Download PDF
+                                  Download
                                 </Button>
                               </div>
                             </div>
@@ -394,6 +408,15 @@ const Appointments = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        {selectedPrescriptionId && (
+          <PrescriptionViewDialog
+            open={showPrescriptionDialog}
+            onOpenChange={setShowPrescriptionDialog}
+            prescriptionId={selectedPrescriptionId}
+            patientName={user?.email?.split('@')[0] || 'Patient'}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
