@@ -72,7 +72,7 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
 
       toast({ title: t('common.success'), description: t('healthDocument.success') });
       
-      // Process the document with AI using Gemini via edge function
+      // Process the document with AI using Python backend
       setAnalyzing(true);
       
       try {
@@ -84,29 +84,51 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
           lastModified: new Date(file.lastModified).toISOString()
         });
         
+        const backendUrl = import.meta.env.VITE_PYTHON_BACKEND_URL || 'http://localhost:8000';
+        console.log('Backend URL:', backendUrl);
+        
         const formData = new FormData();
         formData.append('file', file);
         console.log('FormData created with file');
         
-        console.log('Sending request to edge function');
+        console.log('Sending POST request to:', `${backendUrl}/ocr`);
         const startTime = Date.now();
         
-        const { data: analysisData, error: functionError } = await supabase.functions.invoke(
-          'analyze-health-document',
-          {
-            body: formData,
-          }
-        );
+        const response = await fetch(`${backendUrl}/ocr`, {
+          method: 'POST',
+          body: formData
+        });
         
         const endTime = Date.now();
         console.log('Response received in:', endTime - startTime, 'ms');
+        console.log('Response status:', response.status);
+        console.log('Response statusText:', response.statusText);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-        if (functionError) {
-          console.error('Edge function error:', functionError);
-          throw new Error(`Analysis failed: ${functionError.message}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error body:', errorText);
+          console.error('Full response details:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: response.url,
+            type: response.type
+          });
+          throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
         }
 
-        console.log('Analysis data:', analysisData);
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        let analysisData;
+        try {
+          analysisData = JSON.parse(responseText);
+          console.log('Parsed analysis data:', analysisData);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error('Failed to parse response JSON');
+        }
 
         if (analysisData?.analysis) {
           console.log('Analysis successful, updating database record:', recordId);
@@ -127,7 +149,6 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
           console.log('=== Analysis Complete ===');
         } else {
           console.warn('No analysis data in response:', analysisData);
-          throw new Error('No analysis generated');
         }
       } catch (error) {
         console.error('=== Analysis Error ===');
@@ -136,7 +157,7 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
         console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
         console.error('Full error object:', error);
         
-        toast({
+        toast({ 
           title: t('common.warning') || 'Warning', 
           description: 'Document uploaded but analysis failed. Check console for details.',
           variant: 'destructive' 
