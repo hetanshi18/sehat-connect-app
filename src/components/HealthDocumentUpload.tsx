@@ -76,37 +76,90 @@ export const HealthDocumentUpload = ({ onUploadComplete }: HealthDocumentUploadP
       setAnalyzing(true);
       
       try {
-        // Call Python backend with FormData
+        console.log('=== Starting AI Analysis ===');
+        console.log('File details:', {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          lastModified: new Date(file.lastModified).toISOString()
+        });
+        
         const backendUrl = import.meta.env.VITE_PYTHON_BACKEND_URL || 'http://localhost:8000';
+        console.log('Backend URL:', backendUrl);
+        
         const formData = new FormData();
         formData.append('file', file);
+        console.log('FormData created with file');
+        
+        console.log('Sending POST request to:', `${backendUrl}/ocr`);
+        const startTime = Date.now();
         
         const response = await fetch(`${backendUrl}/ocr`, {
           method: 'POST',
           body: formData
         });
+        
+        const endTime = Date.now();
+        console.log('Response received in:', endTime - startTime, 'ms');
+        console.log('Response status:', response.status);
+        console.log('Response statusText:', response.statusText);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
-          throw new Error('Analysis failed');
+          const errorText = await response.text();
+          console.error('Response error body:', errorText);
+          console.error('Full response details:', {
+            status: response.status,
+            statusText: response.statusText,
+            url: response.url,
+            type: response.type
+          });
+          throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
         }
 
-        const analysisData = await response.json();
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+        
+        let analysisData;
+        try {
+          analysisData = JSON.parse(responseText);
+          console.log('Parsed analysis data:', analysisData);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response text that failed to parse:', responseText);
+          throw new Error('Failed to parse response JSON');
+        }
 
         if (analysisData?.analysis) {
+          console.log('Analysis successful, updating database record:', recordId);
           // Update the record with analysis
-          await supabase
+          const { error: updateError } = await supabase
             .from('health_records')
             .update({ report: analysisData.analysis })
             .eq('id', recordId);
+          
+          if (updateError) {
+            console.error('Database update error:', updateError);
+          } else {
+            console.log('Database updated successfully');
+          }
 
           setAnalysis(analysisData.analysis);
           setShowAnalysis(true);
+          console.log('=== Analysis Complete ===');
+        } else {
+          console.warn('No analysis data in response:', analysisData);
         }
       } catch (error) {
-        console.error('Analysis error:', error);
+        console.error('=== Analysis Error ===');
+        console.error('Error type:', error?.constructor?.name);
+        console.error('Error message:', error instanceof Error ? error.message : String(error));
+        console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+        console.error('Full error object:', error);
+        
         toast({ 
           title: t('common.warning') || 'Warning', 
-          description: 'Document uploaded but analysis failed. You can try again later.',
+          description: 'Document uploaded but analysis failed. Check console for details.',
           variant: 'destructive' 
         });
       }
